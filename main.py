@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import plotly.graph_objects as go
+#import plotly.graph_objects as go
 import calendar
 from datetime import datetime
 import database as db
