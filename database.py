@@ -1,5 +1,5 @@
 import streamlit as st  # pip install streamlit
-#from deta import Deta  # pip install deta
+from deta import Deta  # pip install deta
 import os
 from dotenv import load_dotenv
 
