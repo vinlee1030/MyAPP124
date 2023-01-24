@@ -51,5 +51,5 @@ urllib3==1.26.14
 validators==0.20.0
 watchdog==2.2.1
 zipp==3.11.0
-
+plotly==5.13.0
 
