@@ -82,12 +82,24 @@ if selected == 'My Notes':
     """
     st.markdown(STYLE, unsafe_allow_html=True)
     st.subheader("Upload Your Image")
+    img_num = 0
     uploaded_file = st.file_uploader("Upload Your Image", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
     if uploaded_file:
         for file in uploaded_file:
+            img_num += 1
             if isinstance(file, BytesIO):
                 bytes_data = file.getvalue()
-                st.image(bytes_data, width=250)
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.write(' ')
+
+                with col2:
+                    #st.image("https://static.streamlit.io/examples/dog.jpg")
+                    st.image(bytes_data)  # , width=350
+                with col3:
+                    st.write(' '+ str(img_num))
+
 
     st.subheader("Upload Your Chart")
     uploaded_file = st.file_uploader("Upload Your Chart", type = ['csv'])
