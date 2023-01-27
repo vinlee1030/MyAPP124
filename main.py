@@ -4,6 +4,10 @@ import plotly.graph_objects as go
 import calendar
 from datetime import datetime
 import database as db
+import Note as nt
+import pandas as pd
+import os
+from io import BytesIO, StringIO
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
@@ -11,9 +15,9 @@ EXAMPLE_NO = 1
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Blog", "Other Income"]
 expenses = ["Rent", "Utilities", "Groceries", "Car", "Other Expenses", "Saving"]
-currency = "USD"
-page_title = "Income and Expense Tracker"
-page_icon = ":money_with_wings:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
+currency = "NTD"
+page_title = "My Life App"
+page_icon = ":full_moon_with_face:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
 layout = "centered"
 # --------------------------------------
 st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
@@ -46,8 +50,8 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 with st.sidebar:
     selected = option_menu(
         menu_title="Main Menu", #None
-        options=["Home","Projects","Income&Expense Tracker"], #Contact
-        icons=["house","book","money"], #envelope
+        options=["Home","My Notes","Income&Expense Tracker"], #Contact
+        icons=["house","book","coin"], #envelope
         menu_icon="cast",
         default_index=0,
         orientation="vertical" #optional
@@ -57,20 +61,86 @@ with st.sidebar:
 
 if selected == "Home":
     st.title(f"*{selected}")
-if selected == "Projects":
+    st.text(nt.Note.i)
+if selected == "My Notes":
     st.title(f"*{selected}")
 if selected == "Income&Expense Tracker":
     st.title(f"*{selected}")
-#----------------------------
-selected2 = option_menu(
-    menu_title=None,
-    options=["Data Entry", "Data Visualization"],
-    icons=["pencil-fill", "bar-chart-fill"],  # https://icons.getbootstrap.com/
-    orientation="horizontal",
-)
+#-----------My Notes Tab------------------------
+subjects = ['Macroeconomics','Engineering Math','Mandarin']
+categories = ['HW','Exam','Quiz']
+importance = ['Memorization','Concept','Ez','Advanced']
 
-# --- INPUT & SAVE PERIODS ---
+if selected == 'My Notes':
+    st.info("Welcome")
+    STYLE = """
+    <style>
+    img {
+        max-width: 100%;
+    }
+    </style>
+    """
+    st.markdown(STYLE, unsafe_allow_html=True)
+    st.subheader("Upload Your Image")
+    uploaded_file = st.file_uploader("Upload Your Image", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+    if uploaded_file:
+        for file in uploaded_file:
+            if isinstance(file, BytesIO):
+                bytes_data = file.getvalue()
+                st.image(bytes_data, width=250)
+
+    st.subheader("Upload Your Chart")
+    uploaded_file = st.file_uploader("Upload Your Chart", type = ['csv'])
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file, index_col=None)
+        df.to_csv('dataset.csv', index=None)
+        st.dataframe(df)
+
+    selected2 = option_menu(
+        menu_title=None,
+        options=["Notes Entry", "Notes Search", "Review Notes"],
+        icons=["pencil-fill", "search",'controller'],  # https://icons.getbootstrap.com/  bar-chart-fill
+        orientation="horizontal",
+    )
+
+    if selected2 == "Notes Entry":
+        st.header('+ Create Notes +')
+        with st.form("entry_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            col1.selectbox("Select Subject:", subjects)
+            col2.selectbox("Select Categories:", categories)
+
+            "---"
+            with st.expander("Importance"):
+                for i in importance:
+                    st.number_input(f"{i}", min_value=0, format="%i", step=1)
+            with st.expander("Comment"):
+                comment = st.text_area("", placeholder="Enter a comment here ...")
+
+            add_comment = st.form_submit_button("Add Comment")
+            if add_comment:
+                with st.expander("Comment"):
+                    comment = st.text_area("1", placeholder="Enter a comment here ...")
+
+            "---"
+            submitted = st.form_submit_button("Save Data")
+            if submitted:
+                period = str(st.session_state["year"]) + "_" + str(st.session_state["month"])
+                incomes = {income: st.session_state[income] for income in incomes}
+                expenses = {expense: st.session_state[expense] for expense in expenses}
+                db.insert_period(period, incomes, expenses, comment)
+                st.success("Data saved!")
+
+# --- 'Income&Expense Tracker' Tab/ INPUT & SAVE PERIODS ---
+
 if selected == 'Income&Expense Tracker':
+    selected2 = option_menu(
+        menu_title=None,
+        options=["Data Entry", "Data Visualization"],
+        icons=["pencil-fill", "bar-chart-fill"],  # https://icons.getbootstrap.com/
+        orientation="horizontal",
+    )
+
     if selected2 == "Data Entry":
         st.header(f"Data Entry in {currency}")
         with st.form("entry_form", clear_on_submit=True):
