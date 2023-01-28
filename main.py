@@ -1,3 +1,5 @@
+import io
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 import plotly.graph_objects as go
@@ -8,6 +10,7 @@ import Note as nt
 import pandas as pd
 import os
 from io import BytesIO, StringIO
+from PIL import Image
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
@@ -85,12 +88,15 @@ if selected == 'My Notes':
     st.markdown(STYLE, unsafe_allow_html=True)
     st.subheader("Upload Your Image")
     img_num = 0
+
     uploaded_file = st.file_uploader("Upload Your Image", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
     if uploaded_file:
         for file in uploaded_file:
             img_num += 1
+
             if isinstance(file, BytesIO):
                 bytes_data = file.getvalue()
+                #st.text(bytes_data)
                 col1, col2, col3 = st.columns(3)
 
                 with col1:
@@ -104,9 +110,9 @@ if selected == 'My Notes':
 
 
     st.subheader("Upload Your Chart")
-    uploaded_file = st.file_uploader("Upload Your Chart", type = ['csv'])
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file, index_col=None)
+    uploaded_file2 = st.file_uploader("Upload Your Chart", type = ['csv'])
+    if uploaded_file2:
+        df = pd.read_csv(uploaded_file2, index_col=None)
         df.to_csv('dataset.csv', index=None)
         st.dataframe(df)
 
@@ -139,11 +145,26 @@ if selected == 'My Notes':
             "---"
             submitted = st.form_submit_button("Save Data")
             if submitted:
-                period = str(st.session_state["year"]) + "_" + str(st.session_state["month"])
-                incomes = {income: st.session_state[income] for income in incomes}
-                expenses = {expense: st.session_state[expense] for expense in expenses}
-                db.insert_period(period, incomes, expenses, comment)
+                for file in uploaded_file:
+
+                    fn = os.path.basename(file.name)
+                    # path = os.path.abspath(file.name)
+                    # st.text(path)
+                    db.photos_upload(file, bytes_data)
                 st.success("Data saved!")
+    if selected2 == "Notes Search":
+        st.header("Notes Search")
+        with st.form("saved_periods"):
+            lst_file = db.list_files()
+            selected_file = st.selectbox("Select Period:", lst_file)
+            submitted = st.form_submit_button("Load Notes")
+            if submitted:
+                # Get data from database
+                photos = db.fetch_notes(selected_file)
+                content = photos.read()
+                st.image(content)
+
+
 
 # --- 'Income&Expense Tracker' Tab/ INPUT & SAVE PERIODS ---
 

@@ -57,3 +57,21 @@ class Note:
      #           df = pd.read_csv(uploaded_file, index_col=None)
      #           df.to_csv('dataset.csv', index=None)
      #           st.dataframe(df)
+
+     # img = Image.open(content, mode="r")
+     # photos = io.BytesIO()
+     # photos = photos.getvalue()
+     # st.text(img)
+     # with open("photos", "rb") as f:
+     #     for chunk in photos.iter_chunks(4096):
+     #         st.text(chunk)
+     #         f.write(chunk)
+     #     photos.close()
+     # img = Image.open(photos)
+     # st.image(img)
+
+     # st.image(photos)
+
+     # comment = period_data.get("comment")
+     # expenses = period_data.get("expenses")
+     # incomes = period_data.get("incomes")
