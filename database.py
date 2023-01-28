@@ -2,7 +2,7 @@ import streamlit as st  # pip install streamlit
 from deta import Deta  # pip install deta
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile
+#from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 load_dotenv(".env")
@@ -30,7 +30,7 @@ def get_period(period):
     """If not found, the function will return None"""
     return db.get(period)
 
-app = FastAPI()
+#app = FastAPI()
 
 photos = deta.Drive("images") # access to your drive
 
