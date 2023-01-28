@@ -3,7 +3,7 @@ from deta import Deta  # pip install deta
 import os
 from dotenv import load_dotenv
 #from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import HTMLResponse, StreamingResponse
+#from fastapi.responses import HTMLResponse, StreamingResponse
 
 load_dotenv(".env")
 #DETA_KEY = os.getenv("DETA_KEY")
