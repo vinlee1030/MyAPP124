@@ -1,8 +1,10 @@
 import io
 
+import numpy as np
 import streamlit as st
 from streamlit_option_menu import option_menu
 import plotly.graph_objects as go
+import plotly.express as px
 import calendar
 from datetime import datetime
 import database as db
@@ -14,7 +16,7 @@ from PIL import Image
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
-
+TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])) +":"+ str(datetime.now()).split(":")[1]
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Blog", "Other Income"]
 expenses = ["Rent", "Utilities", "Groceries", "Car", "Other Expenses", "Saving"]
@@ -113,6 +115,9 @@ if selected == 'My Notes':
     uploaded_file2 = st.file_uploader("Upload Your Chart", type = ['csv'])
     if uploaded_file2:
         df = pd.read_csv(uploaded_file2, index_col=None)
+        s = df.to_json(orient = 'columns')
+        st.text(s)
+        db.insert_chart(TODAY,s)
         df.to_csv('dataset.csv', index=None)
         st.dataframe(df)
 
@@ -127,42 +132,125 @@ if selected == 'My Notes':
         st.header('+ Create Notes +')
         with st.form("entry_form", clear_on_submit=True):
             col1, col2 = st.columns(2)
-            col1.selectbox("Select Subject:", subjects)
-            col2.selectbox("Select Categories:", categories)
+            col1.selectbox("Select Subject:", subjects, key = "sub")
+            col2.selectbox("Select Categories:", categories, key = "cat")
 
             "---"
+            with st.expander("Title"):
+                title = st.text_area("Title for search:", placeholder="Enter a comment here ...")
             with st.expander("Importance"):
-                for i in importance:
-                    st.number_input(f"{i}", min_value=0, format="%i", step=1)
+                im_value = []
+                for im in importance:
+                    #st.number_input(f"{im}", min_value=0, format="%i", step=1, key=im)
+                    im_value.append(st.slider('['+im+']'+": "+"scale between 0-10", value=0, max_value= 10))
+                    #st.text(im_value)
             with st.expander("Comment"):
                 comment = st.text_area("", placeholder="Enter a comment here ...")
 
-            add_comment = st.form_submit_button("Add Comment")
-            if add_comment:
-                with st.expander("Comment"):
-                    comment = st.text_area("1", placeholder="Enter a comment here ...")
+
+            if img_num > 1:
+                add_comment = st.form_submit_button("Add Comment")
+                if add_comment:
+                    with st.expander("Comment"):
+                        img_num -= 1
+                        comment = st.text_area(str(img_num), placeholder="Enter a comment here ...")
+
+
 
             "---"
             submitted = st.form_submit_button("Save Data")
             if submitted:
+                sub = str(st.session_state["sub"])
+                cat = str(st.session_state["cat"])
+                #importance = {im: st.session_state[im] for im in importance}
+                n_imp = importance
+                importance = {im: im_value for im in importance}
+                #st.text((im_value))
+                #st.text((n_imp))
+                #st.text((importance))
+                for k in range(len(im_value)):
+                    try:
+                        importance[n_imp[k]] = im_value[k]
+                        #st.text(importance)
+                    except IndexError:
+                        pass
+                title = sub + '-' + cat + "-" + title
+                st.text(TODAY)
+                st.text(sub)
+                st.text(importance)
+                # db.insert_period(TODAY,sub,importance,comment)
+                # db.insert_chart(TODAY,importance)
+                db.insert_wnote(TODAY, sub, cat, importance,comment, title)
                 for file in uploaded_file:
-
+                    bytes_data = file.getvalue()
                     fn = os.path.basename(file.name)
                     # path = os.path.abspath(file.name)
                     # st.text(path)
-                    db.photos_upload(file, bytes_data)
+
+                    db.photos_upload("[Pic]: "+TODAY, bytes_data)
+
+                #db.photos_upload(uploaded_file2, uploaded_file2) <---Deta Drive seems not able to take in charts
+
+                # df = pd.read_csv(uploaded_file2)
+                # s = df.to_json(orient = 'index')
+                # #db.insert_chart(s)
+
+                #chart = db.fetch_chart()
+                #st.text(chart[0]["key"])
+                #st.dataframe(chart)
                 st.success("Data saved!")
     if selected2 == "Notes Search":
         st.header("Notes Search")
         with st.form("saved_periods"):
             lst_file = db.list_files()
-            selected_file = st.selectbox("Select Period:", lst_file)
+            lst_file.insert(0," ") #<----This way u can type the query!!
+            chart = db.fetch_chart()
+            wnote = db.fetch_all_wnote()
+            #st.text(wnote)
+            for i in range(len(chart)):
+                lst_file.append("[chart]: "+chart[i]["key"])
+            for k in range(len(wnote)):
+                try:
+                    lst_file.append("[wnote]: "+wnote[k]["title"])
+                except KeyError:
+                    pass
+
+            selected_file = st.selectbox("Select Results:", lst_file)
             submitted = st.form_submit_button("Load Notes")
             if submitted:
-                # Get data from database
-                photos = db.fetch_notes(selected_file)
-                content = photos.read()
-                st.image(content)
+                if "wnote" in selected_file:
+                    imp_plt = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["importance"]
+                    imp_plt["Advanced"] = [imp_plt["Advanced"]]
+                    # st.text(imp_plt)
+                    fig = px.bar(imp_plt, title='Level')
+                    st.plotly_chart(fig)
+
+                    w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]
+                    # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
+                    try:
+                        # Get data from database
+                        photos = db.fetch_notes("[Pic]: "+ w_srch)
+                        content = photos.read()
+                        st.image(content)
+
+                    except AttributeError:
+                        pass
+
+                    st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])
+
+                    st.json(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")}))
+                    st.dataframe(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")}))  # selected_file.replace("wnote: ","")
+                    # st.text(db.fetch_wnote("3ooonwy6z6f2"))
+
+                else:
+                    try:
+                        # Get data from database
+                        photos = db.fetch_notes(selected_file)
+                        content = photos.read()
+                        st.image(content)
+
+                    except AttributeError:
+                        st.dataframe(chart)
 
 
 

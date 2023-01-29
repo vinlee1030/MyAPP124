@@ -75,3 +75,73 @@ class Note:
      # comment = period_data.get("comment")
      # expenses = period_data.get("expenses")
      # incomes = period_data.get("incomes")
+
+#--------------------Search Chaos----------------------------------------
+# def search(srch, query, lst_file):
+#
+#     #selected_file = st.selectbox("Select Results:", lst_file)
+#     if srch and len(query) != 0 and query != None:
+#         n_lst = ['or']
+#         st.text("Search for: " + query)
+#         for s in range(len(lst_file)):
+#             if query in lst_file[s]:
+#                 n_lst.append(lst_file[s])
+#         # if len(n_lst) == 0:
+#         #     st.text("No result found")
+#         #     selected_file = st.selectbox("Select Results:", lst_file)  # lst_file
+#         #
+#         # else:
+#         selected_file = st.selectbox("Select Results:", n_lst)
+#         lst_file = []
+#         lst_file.append(n_lst)
+#         # db.insert_cache(selected_file, TODAY)
+#         st.text(n_lst)
+#         st.text(selected_file)
+#             # st.text(np.savetxt(n_lst))
+#             # st.text(dict(n_lst))
+#     # else:
+#     #     selected_file = st.selectbox("Select Results:", n_lst)
+#     return n_lst
+#      search_method = ["ByDate", "By Name"]
+#      selected_search = st.selectbox("Select Search Method:", search_method)
+#      # with st.expander("Query"):
+#      #     query = st.text_area("", placeholder="Enter a query here ...")
+#      sub = st.form_submit_button("Enter")
+#      if selected_search == "By Name" and sub:
+#           st.text("Search " + selected_search)
+#      with st.expander("Query"):
+#           query = st.text_area("", placeholder="Enter a query here ...")
+#
+#      srch = st.form_submit_button("Search")
+#
+#
+# if srch and len(query) != 0 and query != None:
+#      n_lst = ['or']
+#      st.text("Search for: " + query)
+#      for s in range(len(lst_file)):
+#           if query in lst_file[s]:
+#                n_lst.append(lst_file[s])
+#      # if len(n_lst) == 0:
+#      #     st.text("No result found")
+#      #     selected_file = st.selectbox("Select Results:", lst_file)  # lst_file
+#      #
+#      # else:
+#      selected_file = st.selectbox("Select Results:", n_lst)
+#      lst_file = []
+#      lst_file.append(n_lst)
+#      # db.insert_cache(selected_file, TODAY)
+#      st.text(n_lst)
+#      st.text(selected_file)
+# else:
+#      selected_file = st.selectbox("Select Results:", lst_file)
+#      # final = db.search(srch, query, lst_file)
+#      # st.text(final)
+#      # enter = st.form_submit_button("Enter!")
+#      # if enter:
+#      #     try:
+#      #         st.text(final)
+#      #     except NameError:
+#      #         st.text("error")
+#      # final = st.selectbox("Select Results:", lst_file)
+#
+#      # final = st.selectbox("Select Results:", db.fetch_cache())
