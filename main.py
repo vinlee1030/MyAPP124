@@ -264,12 +264,19 @@ if selected == 'My Notes':
                                 st.image(content)
                                 st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]["Comment"+str(i+1)+": "])
                             except AttributeError:
-                                pass
+                                try:
+                                    st.success(
+                                    db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                        "Comment" + str(i + 1) + ": "])
+                                except AttributeError:
+                                    st.text("No data exists")
+                                #pass
 
                         try:
                             ct = db.fetch_chart({"key": w_srch})
                             # Get data from database
-                            st.dataframe(ct)
+                            if ct:
+                                st.dataframe(ct)
                         except AttributeError:
                             pass
 
