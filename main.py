@@ -242,8 +242,11 @@ if selected == 'My Notes':
 
                     w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]
                     # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
-                    if len(uploaded_file) != 0:
-                        for i in range(len(uploaded_file)):
+                    
+                    #if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
+                    if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0:
+                        #st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
+                        for i in range(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
                             try:
 
                                 # Get data from database
