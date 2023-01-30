@@ -249,7 +249,6 @@ if selected == 'My Notes':
                     except IndexError:
                         pass
 
-                    w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]
                     # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
                     #if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
                     if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0:
