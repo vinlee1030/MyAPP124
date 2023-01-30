@@ -145,3 +145,23 @@ class Note:
 #      # final = st.selectbox("Select Results:", lst_file)
 #
 #      # final = st.selectbox("Select Results:", db.fetch_cache())
+
+#---------Add comment chaos
+#add_comment = [a ,b ,c,d]
+            # ac = st.form_submit_button("Add Comment" + str(img_num))
+            # if ac:
+            # add_comment[ct] = st.form_submit_button("Add Comment" + str(img_num))
+            # if add_comment[ct]:
+            #
+            #     with st.expander("Comment" + str(ct)):
+            #         ct -= 1
+            #         comment = st.text_area(str(ct), placeholder="Enter a comment here ...")
+            #         add_comment[ct] = st.form_submit_button("Add Comment" + str(img_num))
+            # if img_num > 1:
+            #     add_comment[img_num - 1] = st.form_submit_button("Add Comment"+str(img_num))
+            #     if add_comment[img_num - 1]:
+            #         with st.expander("Comment"+str(img_num)):
+            #             add_comment[img_num - 1] = False
+            #             img_num -= 1
+            #             add_comment[img_num - 1] = st.form_submit_button("Add Comment" + str(img_num))
+            #             comment = st.text_area(str(img_num), placeholder="Enter a comment here ...")

@@ -22,8 +22,11 @@ def insert_period(period, incomes, expenses, comment):
 def insert_chart(date,chart):
     return nt.put(chart,date)
 
-def fetch_chart():
+def fetch_all_chart():
     res = nt.fetch()
+    return res.items
+def fetch_chart(fn):
+    res = nt.fetch(fn)
     return res.items
 
 def fetch_all_periods():
