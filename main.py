@@ -13,9 +13,18 @@ import pandas as pd
 import os
 from io import BytesIO, StringIO
 from PIL import Image
+import pytz
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
+# local_tz = pytz.timezone('Europe/Moscow')
+# def utc_to_local(utc_dt):
+#     local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
+#     return local_tz.normalize(local_dt) # .normalize might be unnecessary
+# def aslocaltimestr(utc_dt):
+#     return utc_to_local(utc_dt).strftime('%Y-%m-%d %H:%M:%S.%f %Z%z')
+
+                                                                                                                  #+8_
 TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])) +":"+ str(datetime.now()).split(":")[1]
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Blog", "Other Income"]
@@ -242,8 +251,10 @@ if selected == 'My Notes':
 
                     w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]
                     # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
-                    if len(uploaded_file) != 0:
-                        for i in range(len(uploaded_file)):
+                    #if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
+                    if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0:
+                        #st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
+                        for i in range(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
                             try:
 
                                 # Get data from database
