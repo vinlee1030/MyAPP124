@@ -23,16 +23,16 @@ def insert_chart(date,chart):
     return nt.put(chart,date)
 
 def fetch_all_chart():
-    # res = nt.fetch()
-    # return res.items
     res = nt.fetch()
-    all_items = res.items
+    return res.items
+#     res = nt.fetch()
+#     all_items = res.items
 
-    # fetch until last is 'None'
-    while res.last:
-        res = nt.fetch(last=res.last)
-        all_items += res.items
-    return all_items
+#     # fetch until last is 'None'
+#     while res.last:
+#         res = nt.fetch(last=res.last)
+#         all_items += res.items
+#     return all_items
 def fetch_chart(fn):
     res = nt.fetch(fn)
     return res.items
