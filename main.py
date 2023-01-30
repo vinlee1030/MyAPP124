@@ -244,7 +244,6 @@ if selected == 'My Notes':
                     # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
                     if len(uploaded_file) != 0:
                         for i in range(len(uploaded_file)):
-                            photos = db.fetch_notes("[Pic]: " + w_srch + "---" + str(i + 1))
                             try:
 
                                 # Get data from database
