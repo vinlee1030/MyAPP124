@@ -487,6 +487,49 @@ if selected == 'To Do List':
         st.text("Work hard Play hard")
 
 if selected == "Home":
+    # Plot daily loading bar chart
+    result = view_all_data()
+    data = {'Task': [], 'Status': [], 'Date': []}
+
+    for i in range(len(result)):  # how many tasks in the list
+        count = 0
+        for key in data:           
+            if result[i][1] == 'ToDo':
+                data[key].append(result[i][count])
+                count += 1
+   
+    clean_data = {'Date': [], "Tasks": []}
+    for key in data:
+        if key == "Date":
+            temp = []
+            clean_data['Date'].append(data['Date'][0])
+            for i in range(len(data['Date'])):
+
+                if data['Date'][i] not in clean_data['Date']:
+                    clean_data['Date'].append(data['Date'][i])
+            for k in range(len(clean_data["Date"])):
+                for p in range(len(clean_data["Date"])):
+                    try:
+                        if int(clean_data["Date"][k][-5:-3]) >= int(clean_data["Date"][k + p][-5:-3]):
+                            if int(clean_data["Date"][k][-2:]) > int(clean_data["Date"][k + p][-2:]):
+                                temp = clean_data["Date"][k + p]
+                                clean_data["Date"][k + p] = clean_data["Date"][k]
+                                clean_data["Date"][k] = temp
+                    except IndexError:
+                        pass
+
+            for j in range(len(clean_data['Date'])):
+                clean_data['Tasks'].append(data['Date'].count(clean_data['Date'][j]))
+
+    # st.write(data['Date'])
+    # st.write(clean_data)
+    # data.update({"Tasks":tasks})
+    df = pd.DataFrame.from_dict(clean_data)
+    fig = px.bar(df, x='Date', y='Tasks',
+                 hover_data=['Tasks'], color='Tasks',
+                 labels={'Tasks': 'Up coming tasks'}, height=400)
+    # fig.show()
+    st.plotly_chart(fig)
     # st.subheader("View Items")
     st.header("Tasks")
     #with st.expander("View All"):
