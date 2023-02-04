@@ -316,13 +316,14 @@ if selected == 'Income&Expense Tracker':
         st.header(f"Data Entry in {currency}")
         with st.form("entry_form", clear_on_submit=True):
             col1, col2 = st.columns(2)
-            col1.selectbox("Select Month:", months, key="month")
-            col2.selectbox("Select Year:", years, key="year")
-
+            # col1.selectbox("Select Month:", months, key="month")
+            # col2.selectbox("Select Year:", years, key="year")
+            period = str(st.date_input("Today's Balance"))
+            #st.text(type(period))
             "---"
             with st.expander("Income"):
                 for income in incomes:
-                    st.number_input(f"{income}:", min_value=0, format="%i", step=10, key=income)
+                    st.number_input(f"{income}:", min_value=0, format="%i", step=100, key=income)
             with st.expander("Expenses"):
                 for expense in expenses:
                     st.number_input(f"{expense}:", min_value=0, format="%i", step=10, key=expense)
@@ -332,7 +333,8 @@ if selected == 'Income&Expense Tracker':
             "---"
             submitted = st.form_submit_button("Save Data")
             if submitted:
-                period = str(st.session_state["year"]) + "_" + str(st.session_state["month"])
+                #period = str(st.session_state["year"]) + "_" + str(st.session_state["month"])
+
                 incomes = {income: st.session_state[income] for income in incomes}
                 expenses = {expense: st.session_state[expense] for expense in expenses}
                 db.insert_period(period, incomes, expenses, comment)
@@ -348,18 +350,21 @@ if selected == 'Income&Expense Tracker':
             if submitted:
                 # Get data from database
                 period_data = db.get_period(period)
+                #st.write(period_data)
                 comment = period_data.get("comment")
                 expenses = period_data.get("expenses")
+                #st.write(expenses)
                 incomes = period_data.get("incomes")
+                #st.write(incomes)
 
                 # Create metrics
                 total_income = sum(incomes.values())
                 total_expense = sum(expenses.values())
                 remaining_budget = total_income - total_expense
                 col1, col2, col3 = st.columns(3)
-                col1.metric("Total Income", f"{total_income} {currency}")
-                col2.metric("Total Expense", f"{total_expense} {currency}")
-                col3.metric("Remaining Budget", f"{remaining_budget} {currency}")
+                col1.metric("Total Income", f"${total_income} {currency}")
+                col2.metric("Total Expense", f"${total_expense} {currency}")
+                col3.metric("Remaining Budget", f"${remaining_budget} {currency}")
                 st.text(f"Comment: {comment}")
 
                 # Create sankey chart
@@ -371,6 +376,57 @@ if selected == 'Income&Expense Tracker':
                 # Data to dict, dict to sankey
                 link = dict(source=source, target=target, value=value)
                 node = dict(label=label, pad=20, thickness=30, color="#E694FF")
+                data = go.Sankey(link=link, node=node)
+
+                # Plot it!
+                fig = go.Figure(data)
+                fig.update_layout(margin=dict(l=0, r=0, t=5, b=5))
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Get data from database
+
+                total_income = 0
+                total_expense = 0
+                all_periods = get_all_periods()
+                st.metric("Balance Logs", len(all_periods),"Days")
+                income_keys = {}
+                expenses_keys = {}
+                for p in all_periods:
+                    period_data = db.get_period(p)
+                    #st.write(p)
+                    expenses = period_data.get("expenses")
+                    incomes = period_data.get("incomes")
+                    total_income += sum(incomes.values())
+                    total_expense += sum(expenses.values())
+                    for i in incomes:
+                        if i not in income_keys:
+                            income_keys.update({i:incomes[i]})
+                        else:
+                            income_keys[i] += incomes[i]
+                    for j in expenses:
+                        if j not in expenses_keys:
+                            expenses_keys.update({j:expenses[j]})
+                        else:
+                            expenses_keys[j] += expenses[j]
+                # st.text(income_keys)
+                # st.text(expenses_keys)
+                # Create metrics
+                remaining_budget = total_income - total_expense
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Total Income", f"${total_income} {currency}")
+                col2.metric("Total Expense", f"${total_expense} {currency}")
+                col3.metric("Remaining Budget", f"${remaining_budget} {currency}")
+
+
+                # Create sankey chart
+                label = list(income_keys.keys()) + ["Total Income"] + list(expenses_keys.keys())
+                source = list(range(len(income_keys))) + [len(income_keys)] * len(expenses_keys)
+                target = [len(income_keys)] * len(income_keys) + [label.index(expense) for expense in expenses_keys.keys()]
+                value = list(income_keys.values()) + list(expenses_keys.values())
+                #
+                # Data to dict, dict to sankey
+                link = dict(source=source, target=target, value=value)
+                node = dict(label=label, pad=20, thickness=30, color = 'rgba(255,0,255,0.8)')
                 data = go.Sankey(link=link, node=node)
 
                 # Plot it!
@@ -408,7 +464,8 @@ if selected == 'To Do List':
         # st.subheader("View Items")
         with st.expander("View All"):
             result = view_all_data()
-            # st.write(result)
+            st.write(result[0])
+
             clean_df = pd.DataFrame(result, columns=["Task", "Status", "Date"])
             st.dataframe(clean_df)
 
@@ -493,11 +550,11 @@ if selected == "Home":
 
     for i in range(len(result)):  # how many tasks in the list
         count = 0
-        for key in data:           
+        for key in data:
             if result[i][1] == 'ToDo':
                 data[key].append(result[i][count])
                 count += 1
-   
+
     clean_data = {'Date': [], "Tasks": []}
     for key in data:
         if key == "Date":
@@ -546,6 +603,56 @@ if selected == "Home":
 
     p1 = px.pie(task_df, names='index', values='Status')
     st.plotly_chart(p1, use_container_width=True)
+
+    # Get data from database
+    st.title("Spendings")
+    total_income = 0
+    total_expense = 0
+    all_periods = get_all_periods()
+    st.metric("Balance Logs", len(all_periods), "Days")
+    income_keys = {}
+    expenses_keys = {}
+    for p in all_periods:
+        period_data = db.get_period(p)
+        # st.write(p)
+        expenses = period_data.get("expenses")
+        incomes = period_data.get("incomes")
+        total_income += sum(incomes.values())
+        total_expense += sum(expenses.values())
+        for i in incomes:
+            if i not in income_keys:
+                income_keys.update({i: incomes[i]})
+            else:
+                income_keys[i] += incomes[i]
+        for j in expenses:
+            if j not in expenses_keys:
+                expenses_keys.update({j: expenses[j]})
+            else:
+                expenses_keys[j] += expenses[j]
+    # st.text(income_keys)
+    # st.text(expenses_keys)
+    # Create metrics
+    remaining_budget = total_income - total_expense
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Income", f"{total_income} {currency}")
+    col2.metric("Total Expense", f"{total_expense} {currency}")
+    col3.metric("Remaining Budget", f"{remaining_budget} {currency}")
+
+    # Create sankey chart
+    label = list(income_keys.keys()) + ["Total Income"] + list(expenses_keys.keys())
+    source = list(range(len(income_keys))) + [len(income_keys)] * len(expenses_keys)
+    target = [len(income_keys)] * len(income_keys) + [label.index(expense) for expense in expenses_keys.keys()]
+    value = list(income_keys.values()) + list(expenses_keys.values())
+    #
+    # Data to dict, dict to sankey
+    link = dict(source=source, target=target, value=value)
+    node = dict(label=label, pad=20, thickness=30, color='rgba(255,0,255,0.8)')
+    data = go.Sankey(link=link, node=node)
+
+    # Plot it!
+    fig = go.Figure(data)
+    fig.update_layout(margin=dict(l=0, r=0, t=5, b=5))
+    st.plotly_chart(fig, use_container_width=True)
 
 
 
