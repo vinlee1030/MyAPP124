@@ -94,6 +94,13 @@ def fetch_all_wnote():
         all_items += res.items
     return all_items
 
+sub = deta.Base("Notes_Subjects")
+def insert_sub(key, date):
+    return sub.put(key, date)
+
+def fetch_sub():
+    res = sub.fetch()
+    return res.items
 #, "subject": subject})#, "category": category, 'importance':importance, "comment": comment})
 #,subject):#, category,importance, comment
 # @app.get("/", response_class=HTMLResponse)
