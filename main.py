@@ -25,7 +25,7 @@ EXAMPLE_NO = 1
 #     return utc_to_local(utc_dt).strftime('%Y-%m-%d %H:%M:%S.%f %Z%z')
 
                                                                                                                   #+8_
-TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])) +":"+ str(datetime.now()).split(":")[1]
+TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])+8) +":"+ str(datetime.now()).split(":")[1]
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Allowance", 'Interests',"Other Income"]
 expenses = ["Breakfast",'Brunch','Lunch','Dinner','Drinks', "Transportation","Daily Necessities","Education","Entertainment", "Investments", "Groceries", "Other Expenses", "Saving"]
