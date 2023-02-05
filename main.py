@@ -780,7 +780,7 @@ if selected == "Home":
     #
     # Data to dict, dict to sankey
     link = dict(source=source, target=target, value=value)
-    node = dict(label=label, pad=20, thickness=30, color='rgba(255,0,255,0.8)')
+    node = dict(label=label, pad=20, thickness=30, color='rgba(0,255,255,0.4)')
     data = go.Sankey(link=link, node=node)
 
     # Plot it!
