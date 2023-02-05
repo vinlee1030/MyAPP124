@@ -25,10 +25,10 @@ EXAMPLE_NO = 1
 #     return utc_to_local(utc_dt).strftime('%Y-%m-%d %H:%M:%S.%f %Z%z')
 
                                                                                                                   #+8_
-TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])+8) +":"+ str(datetime.now()).split(":")[1]
+TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])) +":"+ str(datetime.now()).split(":")[1]
 # -------------- SETTINGS --------------
-incomes = ["Salary", "Blog", "Other Income"]
-expenses = ["Rent", "Utilities", "Groceries", "Car", "Other Expenses", "Saving"]
+incomes = ["Salary", "Allowance", 'Interests',"Other Income"]
+expenses = ["Breakfast",'Brunch','Lunch','Dinner','Drinks', "Transportation","Daily Necessities","Education","Entertainment", "Investments", "Groceries", "Other Expenses", "Saving"]
 currency = "NTD"
 page_title = "My Life App"
 page_icon = ":full_moon_with_face:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
@@ -87,10 +87,10 @@ if selected == "Income&Expense Tracker":
 if selected == "To Do List":
     st.title(f"<{selected}>")
 #-----------My Notes Tab------------------------
-subjects = ['','Macroeconomics','Engineering Math','Mandarin','Biology','BioStats','Envir. Hygiene','Psy.','Idea','Lecture','Future Plannings','Others']
+subjects = ['','Macroeconomics','Engineering Math','Mandarin','Biology','BioStats','Env.Hygiene','Psychology','Ideas','Lecture','Future Plannings','Journal','Others']
 categories = ['Lecture Notes','Exam','Quiz','HW']
 importance = ['Memorization','Concept','Eziness','Advanced']
-
+#db.insert_sub(subjects,TODAY) #FUTURE: Create Subjects!
 if selected == 'My Notes':
     st.info("Welcome")
     STYLE = """
@@ -101,45 +101,128 @@ if selected == 'My Notes':
     </style>
     """
     st.markdown(STYLE, unsafe_allow_html=True)
-    st.subheader("Upload Your Image")
-    img_num = 0
 
-    uploaded_file = st.file_uploader("Upload Your Image", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-    if uploaded_file:
-        for file in uploaded_file:
-            img_num += 1
+    selected3 = option_menu(
+        menu_title=None,
+        options=subjects,
+        icons=["search", "currency-exchange", 'infinity','translate','heart',
+               'bar-chart-line','flower3','emoji-smile-upside-down-fill','lightbulb-fill',
+               'collection-play-fill','card-checklist','journal-richtext','motherboard'],  # https://icons.getbootstrap.com/  bar-chart-fill
+        orientation="horizontal",
+    )
+    if selected3 != '':
+        lst_file = []  # db.list_files()[-1:]
+        # st.write(lst_file)
+        # lst_file.insert(0, " ")  # <----This way u can type the query!!
+        # chart = db.fetch_all_chart()[-2:]
+        wnote = []
+        all_wnote = db.fetch_all_wnote()
+        #st.text(all_wnote)
+        for i in range(len(all_wnote)):
+            if selected3 in all_wnote[i]['title']:
+                wnote.append(all_wnote[i])
+        if wnote == []:
+            st.text("No notes found! You should start taking notes!!")
+        else:
+            st.text(wnote)
+        # for i in range(len(chart)):
+        #     lst_file.append("[chart]: " + chart[i]["key"])
+        for k in range(len(wnote)):
+            try:
+                lst_file.append("[wnote]: " + wnote[k]["title"])  # + "- #{Content}" + str(wnote[k]["comment"]))
+            except KeyError:
+                pass
+        lst_file = list(reversed(lst_file))
+        for i in range(0, len(lst_file)):
+            selected_file = lst_file[i]
+            st.write(selected_file)
 
-            if isinstance(file, BytesIO):
-                bytes_data = file.getvalue()
-                #st.text(bytes_data)
-                col1, col2, col3 = st.columns(3)
+            if "wnote" in selected_file:
+                # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])
+                try:
+                    imp_plt = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["importance"]
+                    imp_plt["Advanced"] = [imp_plt["Advanced"]]
+                    # st.text(imp_plt)
+                    fig = px.bar(imp_plt, title='Level')
+                    st.plotly_chart(fig)
+                except IndexError:
+                    pass
 
-                with col1:
-                    st.write(' ')
+                w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]  # ==TODAY
+                # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
 
-                with col2:
-                    #st.image("https://static.streamlit.io/examples/dog.jpg")
-                    st.image(bytes_data)  # , width=350
-                with col3:
-                    st.write(' '+ str(img_num))
+                # if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
+                if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0][
+                           "comment"]) != 0:  # <---always >=1; doesn't need this
+                    # st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
+                    for i in range(
+                            len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
+                        try:
 
+                            # Get data from database
+                            photos = db.fetch_notes("[Pic]: " + w_srch + "---" + str(i + 1))
+                            content = photos.read()
+                            st.image(content)
+                            st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                           "Comment" + str(i + 1) + ": "])
+                        except AttributeError:
+                            try:
+                                st.success(
+                                    db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                        "Comment" + str(i + 1) + ": "])
+                            except TypeError:
+                                # st.text("No data exists")
+                                pass
 
-    st.subheader("Upload Your Chart")
-    uploaded_file2 = st.file_uploader("Upload Your Chart", type = ['csv'])
-    if uploaded_file2:
-        df = pd.read_csv(uploaded_file2, index_col=None)
-        s = df.to_json(orient = 'columns')
-        st.text(s)
-        db.insert_chart(TODAY,s)
-        df.to_csv('dataset.csv', index=None)
-        st.dataframe(df)
+                    try:
 
+                        ct = db.fetch_chart({"key": w_srch})
+                        # Get data from database
+                        if ct:
+                            # st.dataframe(ct)
+                            ct = db.fetch_chart({"key": w_srch})
+                            import json
+
+                            jsonStr = json.dumps(ct)
+                            df = pd.read_json(jsonStr)
+                            st.dataframe(df)
+                    except AttributeError:
+                        pass
+
+                else:
+                    st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                   "Comment1" + ": "])
+
+                # st.json(db.fetch_wnote(
+                #     {"title": selected_file.replace("[wnote]: ", "")}))  # <--May Reapeat! Search by title name
+                st.dataframe(db.fetch_wnote(
+                    {"title": selected_file.replace("[wnote]: ", "")}))  # selected_file.replace("wnote: ","")
+                # st.text(db.fetch_wnote("3ooonwy6z6f2"))
+            elif "[chart]" in selected_file:
+                w_srch = selected_file.replace("[chart]: ", "")
+                ct = db.fetch_chart({"key": w_srch})
+                # import json
+                # jsonStr = json.dumps(ct)
+                # df = pd.read_json(jsonStr)
+                #
+                # #df.to_csv('dataset.csv', index=None)
+                # st.dataframe(df)
+                st.dataframe(ct)
+            elif '[Pic]' in selected_file:
+                # w_srch = selected_file.replace("[Pic]: ", "")
+                # if "---" in w_srch:
+                #     w_srch = w_srch[:w_srch.find('---')]
+                # st.text(w_srch)
+                photos = db.fetch_notes(selected_file)
+                content = photos.read()
+                st.image(content)
     selected2 = option_menu(
         menu_title=None,
         options=["Notes Entry", "Notes Search", "Review Notes"],
         icons=["pencil-fill", "search",'controller'],  # https://icons.getbootstrap.com/  bar-chart-fill
         orientation="horizontal",
     )
+
     a = False
     b = False
     c = False
@@ -149,6 +232,39 @@ if selected == 'My Notes':
     cm = []
     if selected2 == "Notes Entry":
         st.header('+ Create Notes +')
+        st.subheader("Upload Your Image")
+        img_num = 0
+
+        uploaded_file = st.file_uploader("Upload Your Image", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+        if uploaded_file:
+            for file in uploaded_file:
+                img_num += 1
+
+                if isinstance(file, BytesIO):
+                    bytes_data = file.getvalue()
+                    # st.text(bytes_data)
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        st.write(' ')
+
+                    with col2:
+                        # st.image("https://static.streamlit.io/examples/dog.jpg")
+                        st.image(bytes_data)  # , width=350
+                    with col3:
+                        st.write(' ' + str(img_num))
+
+        st.subheader("Upload Your Chart")
+        uploaded_file2 = st.file_uploader("Upload Your Chart", type=['csv'])
+        if uploaded_file2:
+            df = pd.read_csv(uploaded_file2, index_col=None)
+            s = df.to_json(orient='columns')  #
+            # st.text(s) s = df.to_csv()
+            st.text(s)
+            db.insert_chart(TODAY, s)
+            # df.to_csv('dataset.csv', index=None)
+            st.dataframe(df)
+
         with st.form("entry_form", clear_on_submit=True):
             col1, col2 = st.columns(2)
             col1.selectbox("Select Subject:", subjects, key = "sub")
@@ -200,6 +316,11 @@ if selected == 'My Notes':
                 # db.insert_period(TODAY,sub,importance,comment)
                 # db.insert_chart(TODAY,importance)
                 db.insert_wnote(TODAY, sub, cat, importance,comment, title)
+                # uploaded_file2 = st.file_uploader("Upload Your Chart", type=['csv'])
+                # if uploaded_file2:
+                # df = pd.read_csv(uploaded_file2, index_col=None)
+                # s = df.to_json(orient='columns')
+                # db.insert_chart(TODAY, s)
                 i = 0
                 for file in uploaded_file:
                     bytes_data = file.getvalue()
@@ -222,10 +343,10 @@ if selected == 'My Notes':
     if selected2 == "Notes Search":
         st.header("Notes Search")
         with st.form("saved_periods"):
-            lst_file = db.list_files()
+            lst_file = db.list_files()[-5:]
             lst_file.insert(0," ") #<----This way u can type the query!!
-            chart = db.fetch_all_chart()
-            wnote = db.fetch_all_wnote()
+            chart = db.fetch_all_chart()[-2:]
+            wnote = db.fetch_all_wnote()[-10:]
             #st.text(wnote)
             for i in range(len(chart)):
                 lst_file.append("[chart]: "+chart[i]["key"])
@@ -253,7 +374,7 @@ if selected == 'My Notes':
                     # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
 
                     #if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
-                    if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0:
+                    if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0: #<---always >=1; doesn't need this
                         #st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
                         for i in range(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
                             try:
@@ -267,29 +388,42 @@ if selected == 'My Notes':
                                 try:
                                     st.success(
                                     db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
-                                        "Comment" + str(i + 1) + ": "])
+                                        "Comment" + str(i + 1) + ": "]) #fetch: returns the whole dictionary when one key is searched  db.fetch({"age": 30})-->returns whole dict with this element
                                 except AttributeError:
                                     st.text("No data exists")
                                 #pass
 
                         try:
+
                             ct = db.fetch_chart({"key": w_srch})
                             # Get data from database
                             if ct:
-                                st.dataframe(ct)
+
+                                #st.dataframe(ct)
+                                ct = db.fetch_chart({"key": w_srch})
+                                import json
+                                jsonStr = json.dumps(ct)
+                                df = pd.read_json(jsonStr)
+                                st.dataframe(df)
                         except AttributeError:
                             pass
 
                     else:
                         st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]["Comment1"+ ": "])
 
-                    st.json(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")}))
+                    st.json(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})) #<--May Reapeat! Search by title name
                     st.dataframe(db.fetch_wnote(
                         {"title": selected_file.replace("[wnote]: ", "")}))  # selected_file.replace("wnote: ","")
                     # st.text(db.fetch_wnote("3ooonwy6z6f2"))
                 elif "[chart]" in selected_file:
                     w_srch = selected_file.replace("[chart]: ", "")
                     ct = db.fetch_chart({"key": w_srch})
+                    # import json
+                    # jsonStr = json.dumps(ct)
+                    # df = pd.read_json(jsonStr)
+                    #
+                    # #df.to_csv('dataset.csv', index=None)
+                    # st.dataframe(df)
                     st.dataframe(ct)
                 elif '[Pic]' in selected_file:
                     # w_srch = selected_file.replace("[Pic]: ", "")
@@ -634,9 +768,9 @@ if selected == "Home":
     # Create metrics
     remaining_budget = total_income - total_expense
     col1, col2, col3 = st.columns(3)
-    col1.metric("Total Income", f"{total_income} {currency}")
-    col2.metric("Total Expense", f"{total_expense} {currency}")
-    col3.metric("Remaining Budget", f"{remaining_budget} {currency}")
+    col1.metric("Total Income", f"${total_income} {currency}")
+    col2.metric("Total Expense", f"${total_expense} {currency}")
+    col3.metric("Remaining Budget", f"${remaining_budget} {currency}")
 
     # Create sankey chart
     label = list(income_keys.keys()) + ["Total Income"] + list(expenses_keys.keys())
@@ -654,7 +788,109 @@ if selected == "Home":
     fig.update_layout(margin=dict(l=0, r=0, t=5, b=5))
     st.plotly_chart(fig, use_container_width=True)
 
+    #-------------Load review notes---------------------
 
+    lst_file = []#db.list_files()[-1:]
+    #st.write(lst_file)
+    # lst_file.insert(0, " ")  # <----This way u can type the query!!
+    # chart = db.fetch_all_chart()[-2:]
+    try:
+        wnote = db.fetch_all_wnote()[-2:]
+    except IndexError:
+        try:
+            wnote = db.fetch_all_wnote()[-1:]
+        except IndexError:
+            st.write("No notes found! You should start taking notes!!")
+    # st.text(wnote)
+    # for i in range(len(chart)):
+    #     lst_file.append("[chart]: " + chart[i]["key"])
+    for k in range(len(wnote)):
+        try:
+            lst_file.append("[wnote]: " + wnote[k]["title"])  # + "- #{Content}" + str(wnote[k]["comment"]))
+        except KeyError:
+            pass
+    lst_file = list(reversed(lst_file))
+    for i in range(0,len(lst_file)):
+        selected_file = lst_file[i]
+        st.write(selected_file)
 
+        if "wnote" in selected_file:
+            # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])
+            try:
+                imp_plt = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["importance"]
+                imp_plt["Advanced"] = [imp_plt["Advanced"]]
+                # st.text(imp_plt)
+                fig = px.bar(imp_plt, title='Level')
+                st.plotly_chart(fig)
+            except IndexError:
+                pass
 
+            w_srch = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]  # ==TODAY
+            # st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ","")})[0]["importance"])
+
+            # if len(uploaded_file) != 0: <-----This causes number of photos/notes retricted by current uploaded_file!!!
+            if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0][
+                       "comment"]) != 0:  # <---always >=1; doesn't need this
+                # st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
+                for i in range(
+                        len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
+                    try:
+
+                        # Get data from database
+                        photos = db.fetch_notes("[Pic]: " + w_srch + "---" + str(i + 1))
+                        content = photos.read()
+                        st.image(content)
+                        st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                       "Comment" + str(i + 1) + ": "])
+                    except AttributeError:
+                        try:
+                            st.success(
+                                db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                    "Comment" + str(i + 1) + ": "])
+                        except TypeError:
+                            #st.text("No data exists")
+                            pass
+
+                try:
+
+                    ct = db.fetch_chart({"key": w_srch})
+                    # Get data from database
+                    if ct:
+                        # st.dataframe(ct)
+                        ct = db.fetch_chart({"key": w_srch})
+                        import json
+
+                        jsonStr = json.dumps(ct)
+                        df = pd.read_json(jsonStr)
+                        st.dataframe(df)
+                except AttributeError:
+                    pass
+
+            else:
+                st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                               "Comment1" + ": "])
+
+            # st.json(db.fetch_wnote(
+            #     {"title": selected_file.replace("[wnote]: ", "")}))  # <--May Reapeat! Search by title name
+            st.dataframe(db.fetch_wnote(
+                {"title": selected_file.replace("[wnote]: ", "")}))  # selected_file.replace("wnote: ","")
+            # st.text(db.fetch_wnote("3ooonwy6z6f2"))
+        elif "[chart]" in selected_file:
+            w_srch = selected_file.replace("[chart]: ", "")
+            ct = db.fetch_chart({"key": w_srch})
+            # import json
+            # jsonStr = json.dumps(ct)
+            # df = pd.read_json(jsonStr)
+            #
+            # #df.to_csv('dataset.csv', index=None)
+            # st.dataframe(df)
+            st.dataframe(ct)
+        elif '[Pic]' in selected_file:
+            # w_srch = selected_file.replace("[Pic]: ", "")
+            # if "---" in w_srch:
+            #     w_srch = w_srch[:w_srch.find('---')]
+            # st.text(w_srch)
+            photos = db.fetch_notes(selected_file)
+            content = photos.read()
+            st.image(content)
 
