@@ -14,6 +14,8 @@ import os
 from io import BytesIO, StringIO
 from PIL import Image
 import pytz
+import random
+import ast
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
@@ -25,7 +27,7 @@ EXAMPLE_NO = 1
 #     return utc_to_local(utc_dt).strftime('%Y-%m-%d %H:%M:%S.%f %Z%z')
 
                                                                                                                   #+8_
-TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])+8) +":"+ str(datetime.now()).split(":")[1]
+TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])+8) +":"+ str(datetime.now()).split(":")[1]+" "+str(datetime.now()).split(":")[2]
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Allowance", 'Interests',"Other Income"]
 expenses = ["Breakfast",'Brunch','Lunch','Dinner','Drinks', "Transportation","Daily Necessities","Education","Entertainment", "Investments", "Groceries", "Other Expenses", "Saving"]
@@ -64,15 +66,15 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 with st.sidebar:
     selected = option_menu(
         menu_title="Main Menu", #None
-        options=["Home","My Notes","Income&Expense Tracker","To Do List"], #Contact
-        icons=["house","book","coin"], #envelope
+        options=["Home","My Notes","Income&Expense Tracker","To Do List","SIR Model Simulation"], #Contact
+        icons=["house","book","coin",'chart'], #envelope
         menu_icon="cast",
         default_index=0,
         orientation="vertical" #optional
 
     )
 #st.title("My App")
-
+#n_quiz = []
 if selected == "Home":
     st.title(f"<{selected}>")
     # st.write('''
@@ -435,7 +437,370 @@ if selected == 'My Notes':
                     st.image(content)
 
 
+    if selected2 == "Review Notes":
+        st.header("Review")
+        #db.insert_quiz('[]',TODAY,["C"],["D"],True)
+        wnote = db.fetch_all_wnote()
+        #st.write(wnote)
+        #quiz = []
+        for i in range(len(wnote)):
+            #st.write()
+            num = wnote[i]['title'].find('{Content}')
+            dic_comment = eval(wnote[i]['title'][num+9:])
+            if dic_comment['Comment1: '] != '':
+                st.write(wnote[i]['title'])
+            for k in dic_comment:
+                b_split = dic_comment[k].split("//")
+                for b in b_split:
+                    n_split = b.split("::")
+                    if n_split[0] != '':
+                        df = pd.DataFrame(n_split).T
+                        df2 = pd.DataFrame()
+                        df2 = pd.concat([df2,df],axis=1)
+                        #quiz.append(n_split)
+                        st.dataframe(df2)
+                # temp = ['col1','col2','col3','col4','col5','col6','col7','col8','col9','col10','col11']
+                # for n in n_split:
+                #     n_split = st.columns(len(n_split))
+                    #st.write(n_split)
 
+        st.header("Challenge")
+
+        with st.form("entry_form", clear_on_submit=True):
+            # submitted1 = st.form_submit_button("Shuffle")
+            # if submitted1:
+            wnote = db.fetch_all_wnote()
+            quiz = []
+            for i in range(len(wnote)):
+                # st.write()
+                num = wnote[i]['title'].find('{Content}')
+                dic_comment = eval(wnote[i]['title'][num + 9:])
+                # if dic_comment['Comment1: '] != '':
+                # st.write(wnote[i]['title'])
+                for k in dic_comment:
+                    b_split = dic_comment[k].split("//")
+                    for b in b_split:
+                        n_split = b.split("::")
+                        if n_split[0] != '':
+                            df = pd.DataFrame(n_split).T
+                            df2 = pd.DataFrame()
+                            df2 = pd.concat([df2, df], axis=1)
+                            quiz.append(n_split)
+                            # st.dataframe(df2)
+            try:
+                try:
+                    submit = st.form_submit_button("R")
+                    if submit:
+                        try:
+                            for i in range(len(db.fetch_quiz())):
+                                st.write(db.fetch_quiz()[i]["key"])
+                                db.delete_quiz(db.fetch_quiz()[i]["key"])
+
+                        except IndexError:
+                            st.write("Deleted Cache")
+                    if db.fetch_quiz()[-1]["key"] == "[]" or db.fetch_quiz()[-1]["Ans"] == [] or db.fetch_quiz()[-1]["Question"] == []:
+                        db.delete_quiz(db.fetch_quiz()[-1]["key"])
+                        st.write("Delete []")
+                        st.success("All Clear!")
+                        try:
+                            for i in range(len(db.fetch_quiz())):
+                                st.write(db.fetch_quiz()[i]["key"])
+                                db.delete_quiz(db.fetch_quiz()[i]["key"])
+
+                        except IndexError:
+                            st.write("Deleted Cache")
+                        submit = st.form_submit_button("Restart")
+                        if submit:
+                            st.write(db.fetch_quiz())
+                            n_quiz = []            #Bug For  FUTURE FIX-->RESART WOULD TRIGGER SHUFFLING AFTER EVERY SUBMISSION
+                            n_ques = []
+                            n_ans = []
+                        # n_quiz = []            #Bug For  FUTURE FIX-->RESART WOULD TRIGGER SHUFFLING AFTER EVERY SUBMISSION
+                        # n_ques = []
+                        # n_ans = []
+                        # n_quiz = ast.literal_eval(db.fetch_quiz()[0]["key"])
+                        # n_ques = db.fetch_quiz()[0]["Question"]
+                        # n_ans = db.fetch_quiz()[0]["Ans"]
+                            try:
+                                for i in range(len(db.fetch_quiz())):
+                                    st.write(db.fetch_quiz()[i]["key"])
+                                    db.delete_quiz(db.fetch_quiz()[i]["key"])
+
+                            except IndexError:
+                                st.write("Deleted Cache")
+                    else:
+                        try:
+                            # n_quiz = []
+                            n_quiz = ast.literal_eval(db.fetch_quiz()[-1]["key"])
+                            # st.write("quiz")
+                            # st.write(quiz)
+                            n_ques = db.fetch_quiz()[-1]["Question"]
+                            n_ans = db.fetch_quiz()[-1]["Ans"]
+                            # st.write("NL")
+                            #st.write(db.fetch_quiz()[-1])
+                        except IndexError:
+                            st.write("INDEXERROR")
+                            n_quiz = []
+                            n_ques = []
+                            n_ans = []
+                            pass
+
+                        try:
+                            if n_quiz != []:
+                                quiz = n_quiz
+                            if n_ques != []:
+                                question_shuffle = n_quiz
+                            if n_ans != []:
+                                ans_shuffle = n_ans
+                        except NameError:
+                            st.write("NAMEERROR")
+                            pass
+                except NameError:
+                    pass
+            except IndexError:
+                try:
+                    # n_quiz = []
+                    n_quiz = ast.literal_eval(db.fetch_quiz()[-1]["key"])
+                    # st.write("quiz")
+                    # st.write(quiz)
+                    n_ques = db.fetch_quiz()[-1]["Question"]
+                    n_ans = db.fetch_quiz()[-1]["Ans"]
+                    # st.write("NL")
+                    st.write(db.fetch_quiz()[-1])
+                except IndexError:
+                    st.write("INDEXERROR")
+                    n_quiz = []
+                    n_ques = []
+                    n_ans = []
+                    pass
+
+                try:
+                    if n_quiz != []:
+                        quiz = n_quiz
+                    if n_ques != []:
+                        question_shuffle = n_quiz
+                    if n_ans != []:
+                        ans_shuffle = n_ans
+                except NameError:
+                    st.write("NAMEERROR")
+                    pass
+                pass
+
+            # st.write("quiz")
+            # st.write(quiz)
+            # st.write("n_quiz")
+            #
+            # st.write(n_quiz)
+            # st.write(type(n_quiz))
+            question = []
+            ans = []
+            try:
+                if n_ques == [] and n_ans == []:
+                    st.write("SHUF")
+                    for i in range(len(quiz)):
+                        question.append(quiz[i][:-1])
+                        ans.append(quiz[i][-1])
+                    # submitted1 = st.form_submit_button("Shuffle")
+                    # if submitted1:
+                    ans_shuffle = [n for n in ans]
+                    question_shuffle = [q for q in question]
+                    for k in range(len(ans)):
+                        rand = random.randint(0,len(ans)-1)
+                        temp = ans_shuffle[k]
+                        ans_shuffle[k] = ans_shuffle[rand]
+                        ans_shuffle[rand] = temp
+
+                    for k in range(len(ans)):
+                        rand = random.randint(0, len(question) - 1)
+                        temp = question_shuffle[k]
+                        question_shuffle[k] = question_shuffle[rand]
+                        question_shuffle[rand] = temp
+                        #checkbox_val = st.checkbox("Form checkbox")
+                    #db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), False)
+                    # n_quiz = question_shuffle
+                    # n_ans = ans_shuffle
+                else:
+                    st.write("NOT SHUF")
+                    question = []
+                    ans = []
+                    for i in range(len(quiz)):
+                        question.append(quiz[i][:-1])
+                        ans.append(quiz[i][-1])
+                    #db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+                    question_shuffle = n_ques
+                    ans_shuffle = n_ans
+                col1, col2 = st.columns(2)
+                sq = col1.selectbox("Select Question:", question_shuffle)#, key="month"
+                sa = col2.selectbox("Select Ans:", ans_shuffle)#, key="year"
+            except NameError:
+                pass
+            try:
+                question = []
+                ans = []
+                for i in range(len(quiz)):
+                    question.append(quiz[i][:-1])
+                    ans.append(quiz[i][-1])
+                try:
+                    if question.index(sq) == ans.index(sa):
+                        st.write("Correct=True1")
+                        correct = True
+                        #if quiz != []:
+                        db.insert_quiz(str(quiz), TODAY,(question_shuffle),(ans_shuffle),correct)
+
+                    else:
+                        st.write("Correct=False1")
+                        correct = False
+
+                        db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), correct)
+                except ValueError:
+                    st.write("VALUEＥＲＲＯＲ1")
+                    pass
+
+                submitted2 = st.form_submit_button("Submit Answer")
+                n_correct = db.fetch_quiz()[-1]["Correct"]
+                if submitted2:
+                    try:
+                        # n_quiz = []
+                        n_quiz = ast.literal_eval(db.fetch_quiz()[-1]["key"])
+                        #st.write("quiz")
+                        #st.write(quiz)
+                        n_ques = db.fetch_quiz()[-1]["Question"]
+                        n_ans = db.fetch_quiz()[-1]["Ans"]
+                        # st.write("NL")
+                        # st.write(n_quiz)
+                    except IndexError:
+                        n_quiz = []
+                        n_ques = []
+                        n_ans = []
+                        pass
+
+                    try:
+                        if n_quiz != []:
+                            quiz = n_quiz
+                            # try:
+                            #     value_test = n_quiz[0][0]
+                            #     quiz = n_quiz
+                            # except AttributeError:
+                            #     nn_quiz = []
+                            #     quiz = nn_quiz.append(n_quiz)
+                        if n_ques != []:
+                            question_shuffle = n_ques
+                        if n_ans != []:
+                            ans_shuffle = n_ans
+                    except NameError:
+                        st.write("NAMEERROR")
+                        pass
+                    try:
+                        # quiz = ast.literal_eval(db.fetch_quiz()[-1]["key"])
+                        # temp = []
+                        # quiz = temp.append(quiz)
+                        # question = []
+                        # ans = []
+                        # st.write("quiz")
+                        # st.write(quiz)
+                        for i in range(len(quiz)):
+                            question.append(quiz[i][:-1])
+                            ans.append(quiz[i][-1])
+                        #n_correct = db.fetch_quiz()[-1]["Correct"]
+                    # for k in range(len(ans)):
+                    #     rand = random.randint(0,len(ans)-1)
+                    #     temp = ans_shuffle[k]
+                    #     ans_shuffle[k] = ans_shuffle[rand]
+                    #     ans_shuffle[rand] = temp
+                    #     ans_shuffle = {}
+                    #     question_shuffle = {}
+                    #     st.write(quiz)
+                    #     st.write(ans_shuffle)
+                    #     st.write(question_shuffle)
+                        # st.write(ans)
+                        # st.write(ans_shuffle)
+                        # st.write(question.index(sq))
+                        # st.write(ans.index(sa))
+                        # st.write((sq))
+                        #st.write((sa))
+                        # st.write(question)
+                        # st.write(ans)
+                        try:
+                            if question.index(sq) == ans.index(sa):
+                                st.write("Correct=True")
+                                n_correct = True
+                                #db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), correct)
+                            else:
+                                st.write("Correct=False")
+                                n_correct = False
+                                #db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), correct)
+                        except ValueError:
+                            st.write("VALUEＥＲＲＯＲ")
+                            pass
+                        # st.write("n_correct")
+                        # st.write((n_correct))
+                        # st.write(quiz)
+                        st.write(sq)
+                        st.write(sa)
+                        if n_correct:
+                            #st.write("question_shuffle")
+
+                            st.success(str(sq) + '-->' + str(sa) + "       [AC]")
+                            for i in range(len(quiz)):
+                                try:
+                                    if quiz[i][:-1] == sq:
+                                        quiz.remove(quiz[i])
+                                        db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+                                except IndexError:
+                                    pass
+                                try:
+                                    if question_shuffle[i] == sq:
+                                        #st.write(question_shuffle)
+                                        question_shuffle.remove(question_shuffle[i])
+                                        db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+                                except IndexError:
+                                    pass
+
+                                try:
+                                    if ans_shuffle[i] == sa:
+                                        ans_shuffle.remove(ans_shuffle[i])
+                                        db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+                                except IndexError:
+                                    pass
+                            #db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+                            # ans_shuffle = [n for n in ans]
+                            # question_shuffle = [q for q in question]
+                            # col1, col2 = st.columns(2)
+                            # sq = col1.selectbox("Select Question:", question_shuffle)  # , key="month"
+                            # sa = col2.selectbox("Select Ans:", ans_shuffle)  # , key="year"
+                            submitted3 = st.form_submit_button("Continue")
+                            #if submitted3:
+                        else:
+                            submitted3 = st.form_submit_button("Continue")
+                            st.warning("[WA]")
+                            db.insert_quiz(str(quiz), TODAY, (question_shuffle), (ans_shuffle), n_correct)
+
+                    except ValueError:
+                        st.write("ALL CLEAR")
+                        # for i in range(len(wnote)):
+                        #     # st.write()
+                        #     num = wnote[i]['title'].find('{Content}')
+                        #     dic_comment = eval(wnote[i]['title'][num + 9:])
+                        #     #if dic_comment['Comment1: '] != '':
+                        #         #st.write(wnote[i]['title'])
+                        #     for k in dic_comment:
+                        #         b_split = dic_comment[k].split("//")
+                        #         for b in b_split:
+                        #             n_split = b.split("::")
+                        #             if n_split[0] != '':
+                        #                 df = pd.DataFrame(n_split).T
+                        #                 df2 = pd.DataFrame()
+                        #                 df2 = pd.concat([df2, df], axis=1)
+                        #                 quiz.append(n_split)
+                        #db.insert_quiz(quiz, TODAY)
+                        #submitted = st.form_submit_button("Restart")
+                        #if submitted:
+                            #db.insert_quiz([],TODAY)
+                        #pass
+                # elif submitted2 and n_correct==False:
+                #     st.warning("WA")
+            except NameError:
+                pass
 # --- 'Income&Expense Tracker' Tab/ INPUT & SAVE PERIODS ---
 
 if selected == 'Income&Expense Tracker':
@@ -780,7 +1145,7 @@ if selected == "Home":
     #
     # Data to dict, dict to sankey
     link = dict(source=source, target=target, value=value)
-    node = dict(label=label, pad=20, thickness=30, color='rgba(0,255,255,0.4)')
+    node = dict(label=label, pad=20, thickness=30, color='rgba(0,255,255,0.4)')#'rgba(255,0,255,0.8)'
     data = go.Sankey(link=link, node=node)
 
     # Plot it!
@@ -894,3 +1259,52 @@ if selected == "Home":
             content = photos.read()
             st.image(content)
 
+if selected == 'SIR Model Simulation':
+    import matplotlib.pyplot as plt
+    import numpy as np
+    settings = ['ndays','dt','beta','gamma']
+    with st.form("Model"):
+        with st.expander("Settings"):
+            s_value = []
+            for s in settings:
+                # st.number_input(f"{im}", min_value=0, format="%i", step=1, key=im) #<----For number input option
+                s_value.append(st.slider('[' + s + ']' + ": " + "scale between 0-10", value=0.1, max_value=100.0))
+            # for s in settings:
+            #
+            #     ndays = st.slider('ndays',value=10, max_value= 1000)#100
+            #     s_value.append(ndays)
+            #
+            #     dt = st.slider('dt',value=0.1, max_value= 1)#0.1
+            #     s_value.append(dt)
+            #
+            #     beta = st.slider('Beta Value',value=0, max_value= 0.1)#(1.0/3.0)
+            #     s_value.append(beta)
+            #
+            #     gamma = st.slider('Gamma Value',value=0, max_value= 1)#(1.0/14.0)
+            #     s_value.append(gamma)
+        sub2 = st.form_submit_button("Load Model")
+        if sub2:
+            ndays = s_value[0]
+            dt = s_value[1]
+            beta = s_value[2]
+            gamma = s_value[3]
+            npts = int(ndays / dt)
+            S = np.zeros(npts)
+            I = np.zeros(npts)
+            R = np.zeros(npts)
+            t = np.arange(npts)*dt
+
+            I[0] = 0.001#st.slider('Initial Infected',value=0.0, max_value= 0.1)#
+            S[0] = 1 - I[0]
+            R[0] = 0
+
+            for i in range(npts-1):
+                S[i+1] = S[i] - beta*(S[i]*I[i])*dt
+                I[i+1] = I[i] + (beta*S[i]*I[i]-gamma*I[i])*dt
+                R[i+1] = R[i] + (gamma*I[i])*dt
+            fig = plt.figure(1); fig.clf()
+            plt.plot(t,S,'r', lw = 3, label = 'Susceptible')
+            plt.plot(t, I, 'g', lw=3, label='Infective')
+            plt.plot(t,R,'o', lw = 3, label = "Recovered")
+            fig.legend();plt.xlabel("Days");plt.ylabel("Fraction of Population")
+            st.plotly_chart(fig)
