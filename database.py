@@ -76,6 +76,17 @@ def fetch_cache():
     res = sc.fetch()
     return res.items
 
+quiz = deta.Base("Quiz_Log")
+def insert_quiz(n_quiz, date, shuf_ques, shuf_ans,correct):
+    return quiz.put({"key": n_quiz,"Date": date, "Question": shuf_ques, 'Ans': shuf_ans,'Correct':correct})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_quiz():
+    res = quiz.fetch()
+    return res.items
+def delete_quiz(key):
+    res = quiz.delete(key)
+    return res
+
 nt_srch = deta.Base("WritingNotes") #<---------Can't have spaces in name!!!'
 
 def insert_wnote(dt,subject,category,importance,comment,title):
