@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv(".env")
 #DETA_KEY = os.getenv("DETA_KEY")
 DETA_KEY = st.secrets["DETA_KEY"] #<---This for st cloud
-
+CHAT_KEY = st.secrets["CHAT_KEY"]
 # Initialize with a project key
 deta = Deta(DETA_KEY)
 
