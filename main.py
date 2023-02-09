@@ -66,8 +66,8 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 with st.sidebar:
     selected = option_menu(
         menu_title="Main Menu", #None
-        options=["Home","My Notes","Income&Expense Tracker","To Do List","SIR Model Simulation"], #Contact
-        icons=["house","book","coin",'chart'], #envelope
+        options=["Home","My Notes","Income&Expense Tracker","To Do List","SIR Model Simulation","Health Form"], #Contact
+        icons=["house","book","coin",'clipboard-data','bar-chart','bandaid'], #envelope
         menu_icon="cast",
         default_index=0,
         orientation="vertical" #optional
@@ -1043,7 +1043,18 @@ if selected == 'To Do List':
         st.text("Work hard Play hard")
 
 if selected == "Home":
-    # Plot daily loading bar chart
+    #st.title(':moneybag:')
+    m_sum = 0
+    for i in range(len(db.fetch_coin())):
+        m_sum += int(db.fetch_coin()[i]['Earnings'])
+    #st.write(m_sum)
+    col1, col2, col3 = st.columns(3)
+    col2.title(':moneybag:')
+    col2.metric('Account',f"${m_sum}",'Tokens')
+    #st.write(db.fetch_coin()[0]['Earnings'])
+
+
+    # -------------Plot daily loading bar chart
     result = view_all_data()
     data = {'Task': [], 'Status': [], 'Date': []}
 
@@ -1153,6 +1164,8 @@ if selected == "Home":
     fig.update_layout(margin=dict(l=0, r=0, t=5, b=5))
     st.plotly_chart(fig, use_container_width=True)
 
+
+
     #-------------Load review notes---------------------
 
     lst_file = []#db.list_files()[-1:]
@@ -1259,6 +1272,28 @@ if selected == "Home":
             content = photos.read()
             st.image(content)
 
+    st.title("Today's Challenge")
+    nt.Note.quizzing(wnote)
+    st.title("Quiz Search")
+    with st.form("Quick Search"):
+        query = st.text_input('Query')
+        sub = st.form_submit_button("Search")
+        import openai
+        if sub:
+            openai.api_key = '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'
+
+            response = openai.Completion.create(
+                engine="text-davinci-003",  # select model
+                prompt= query,#"ChatGPT是什麼？",
+                max_tokens=512,  # response tokens
+                temperature=1,  # diversity related
+                top_p=0.75,  # diversity related
+                n=1,  # num of response
+            )
+
+            completed_text = response["choices"][0]["text"]
+            st.text(completed_text)
+#---------------------------SIR Model----------------------
 if selected == 'SIR Model Simulation':
     import matplotlib.pyplot as plt
     import numpy as np
@@ -1308,3 +1343,40 @@ if selected == 'SIR Model Simulation':
             plt.plot(t,R,'o', lw = 3, label = "Recovered")
             fig.legend();plt.xlabel("Days");plt.ylabel("Fraction of Population")
             st.plotly_chart(fig)
+
+if selected == "Health Form":
+    with st.form("Entry_Hform", clear_on_submit=True):
+        states = ['N','F','W','A']
+        #col1, col2 = st.columns(2)
+        st.selectbox("Select States:", states, key="states")
+        #col1.selectbox("Select Categories:", categories, key="cat")
+
+        "---"
+        daily_ques = ['H2O Intake','# of Meals','Meals Quality','Hours of Sleep','Naps'
+                      'Hours of Exercises','Intensity of Exercises','#1','#2','Tiredness','Mood']
+        with st.expander("Daily Survey"):
+            d_value = []
+            for d in daily_ques:
+                # st.number_input(f"{im}", min_value=0, format="%i", step=1, key=im) #<----For number input option
+                d_value.append(st.slider('[' + d + ']' + ": " + "scale between 0-10", value=0.0, max_value=15.0,step = 0.5))
+                # st.text(im_value)
+
+        with st.expander("Desciptions"):
+            des = st.text_area("Extra Comment:", placeholder="Enter a comment here ...")
+        submitted = st.form_submit_button("Save Data")
+        if submitted:
+
+            sta = str(st.session_state["states"])
+            #cat = str(st.session_state["cat"])
+            # importance = {im: st.session_state[im] for im in importance}
+            n_dq = daily_ques
+            daily_ques = {d: d_value for d in n_dq}
+            for k in range(len(d_value)):
+                try:
+                    daily_ques[n_dq[k]] = d_value[k]
+                    # st.text(importance)
+                except IndexError:
+                    pass
+
+            db.insert_hform(TODAY, daily_ques, sta, des)
+            st.success("“Physical fitness is the first requisite of happiness.” – Joseph Pilates")
