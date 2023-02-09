@@ -1280,7 +1280,7 @@ if selected == "Home":
         sub = st.form_submit_button("Search")
         import openai
         if sub:
-            openai.api_key = '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'
+            openai.api_key = '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'
 
             response = openai.Completion.create(
                 engine="text-davinci-003",  # select model
