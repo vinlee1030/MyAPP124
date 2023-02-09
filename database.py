@@ -13,7 +13,7 @@ DETA_KEY = st.secrets["DETA_KEY"] #<---This for st cloud
 deta = Deta(DETA_KEY)
 
 # This is how to create/connect a database
-db = deta.Base("monthly_reports")
+db = deta.Base("Daily_reports")
 nt = deta.Base("Notes")
 def insert_period(period, incomes, expenses, comment):
     """Returns the report on a successful creation, otherwise raises an error"""
@@ -25,14 +25,14 @@ def insert_chart(date,chart):
 def fetch_all_chart():
     res = nt.fetch()
     return res.items
-#     res = nt.fetch()
-#     all_items = res.items
-
-#     # fetch until last is 'None'
-#     while res.last:
-#         res = nt.fetch(last=res.last)
-#         all_items += res.items
-#     return all_items
+    # res = nt.fetch()
+    # all_items = res.items
+    #
+    # # fetch until last is 'None'
+    # while res.last:
+    #     res = nt.fetch(last=res.last)
+    #     all_items += res.items
+    # return all_items
 def fetch_chart(fn):
     res = nt.fetch(fn)
     return res.items
@@ -53,7 +53,7 @@ photos = deta.Drive("images") # access to your drive
 
 def photos_upload(fn, data):
     #fn =file.name
-    path = os.path.abspath(fn) #<------return full path: C:\Users\ericn\PycharmProjects\MyAPP124\SingleBH.png
+    #path = os.path.abspath(fn) #<------return full path: C:\Users\ericn\PycharmProjects\MyAPP124\SingleBH.png
     return photos.put(fn, data) #<---------HAS TO FIT IN BYTES_DATA TO GENERATE IMAGE DATA!!
 
 def fetch_notes(fn):
@@ -76,6 +76,13 @@ def fetch_cache():
     res = sc.fetch()
     return res.items
 
+sub = deta.Base("Notes_Subjects")
+def insert_sub(key, date):
+    return sub.put(key, date)
+
+def fetch_sub():
+    res = sub.fetch()
+    return res.items
 quiz = deta.Base("Quiz_Log")
 def insert_quiz(n_quiz, date, shuf_ques, shuf_ans,correct):
     return quiz.put({"key": n_quiz,"Date": date, "Question": shuf_ques, 'Ans': shuf_ans,'Correct':correct})
@@ -85,6 +92,36 @@ def fetch_quiz():
     return res.items
 def delete_quiz(key):
     res = quiz.delete(key)
+    return res
+
+dquiz = deta.Base("Daily_Quiz_Log")
+def insert_dquiz(n_quiz, date, shuf_ques, shuf_ans,correct):
+    return dquiz.put({"key": n_quiz,"Date": date, "Question": shuf_ques, 'Ans': shuf_ans,'Correct':correct})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_dquiz():
+    res = dquiz.fetch()
+    return res.items
+def delete_dquiz(key):
+    res = dquiz.delete(key)
+    return res
+
+coin = deta.Base("CoinMaster")
+def save_coin(c, date):
+    return coin.put({"key": date,"Earnings": c})
+
+def fetch_coin():
+    res = coin.fetch()
+    return res.items
+
+hform = deta.Base("Hform_Log")
+def insert_hform(date, DS, states,descriptions):
+    return hform.put({"key": date, "DailySurvey": DS, 'States': states,'Descriptions':descriptions})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_hform():
+    res = hform.fetch()
+    return res.items
+def delete_hform(key):
+    res = hform.delete(key)
     return res
 
 nt_srch = deta.Base("WritingNotes") #<---------Can't have spaces in name!!!'
@@ -105,13 +142,6 @@ def fetch_all_wnote():
         all_items += res.items
     return all_items
 
-sub = deta.Base("Notes_Subjects")
-def insert_sub(key, date):
-    return sub.put(key, date)
-
-def fetch_sub():
-    res = sub.fetch()
-    return res.items
 #, "subject": subject})#, "category": category, 'importance':importance, "comment": comment})
 #,subject):#, category,importance, comment
 # @app.get("/", response_class=HTMLResponse)
