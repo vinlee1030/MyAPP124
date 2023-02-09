@@ -1071,7 +1071,7 @@ if selected == "Home":
             )
 
             completed_text = response["choices"][0]["text"]
-            st.text(completed_text)
+            st.write(completed_text)
             
     # -------------Plot daily loading bar chart
     result = view_all_data()
