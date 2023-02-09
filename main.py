@@ -1053,7 +1053,26 @@ if selected == "Home":
     col2.metric('Account',f"${m_sum}",'Tokens')
     #st.write(db.fetch_coin()[0]['Earnings'])
 
+    st.title("Quick Search")
+    with st.form("Quick Search"):
+        query = st.text_input('Query')
+        sub = st.form_submit_button("Search")
+        import openai
+        if sub:
+            openai.api_key = db.CHAT_KEY
 
+            response = openai.Completion.create(
+                engine="text-davinci-003",  # select model
+                prompt= query,#"ChatGPT是什麼？",
+                max_tokens=512,  # response tokens
+                temperature=1,  # diversity related
+                top_p=0.75,  # diversity related
+                n=1,  # num of response
+            )
+
+            completed_text = response["choices"][0]["text"]
+            st.text(completed_text)
+            
     # -------------Plot daily loading bar chart
     result = view_all_data()
     data = {'Task': [], 'Status': [], 'Date': []}
@@ -1274,25 +1293,7 @@ if selected == "Home":
 
     st.title("Today's Challenge")
     nt.Note.quizzing(wnote)
-    st.title("Quiz Search")
-    with st.form("Quick Search"):
-        query = st.text_input('Query')
-        sub = st.form_submit_button("Search")
-        import openai
-        if sub:
-            openai.api_key = db.CHAT_KEY
-
-            response = openai.Completion.create(
-                engine="text-davinci-003",  # select model
-                prompt= query,#"ChatGPT是什麼？",
-                max_tokens=512,  # response tokens
-                temperature=1,  # diversity related
-                top_p=0.75,  # diversity related
-                n=1,  # num of response
-            )
-
-            completed_text = response["choices"][0]["text"]
-            st.text(completed_text)
+    
 #---------------------------SIR Model----------------------
 if selected == 'SIR Model Simulation':
     import matplotlib.pyplot as plt
