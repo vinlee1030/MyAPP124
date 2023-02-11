@@ -12,7 +12,7 @@ class Note:
      def quizzing(wnote):
           coin_gain = 0
           coin_loss = 0
-          with st.form("entry_form", clear_on_submit=True):
+          with st.form("entry_form"):#, clear_on_submit=True):
                # submitted1 = st.form_submit_button("Shuffle")
                # if submitted1:
                #wnote = db.fetch_all_wnote()
@@ -48,8 +48,8 @@ class Note:
                                  db.fetch_dquiz()[-1]["Question"] == []:
                               db.delete_dquiz(db.fetch_quiz()[-1]["key"])
                               st.write("Delete []")
-                              st.text(f"Coin_Gain:{coin_gain}")
-                              st.text(f"Coin_Loss:{coin_loss}")
+                              #st.text(f"Coin_Gain:{coin_gain}")
+                              #st.text(f"Coin_Loss:{coin_loss}")
                               st.success("All Clear!")
                               try:
                                    for i in range(len(db.fetch_dquiz())):
@@ -312,6 +312,568 @@ class Note:
 
                except NameError:
                     pass
+
+
+#-----------Memory Quiz------------------------------------------------------------
+          st.title("Memory Quiz")
+          wnote = db.fetch_all_wnote()
+          quiz = []
+          for i in range(len(wnote)):
+               num = wnote[i]['title'].find('{Content}')
+               dic_comment = eval(wnote[i]['title'][num + 9:])
+               # if dic_comment['Comment1: '] != '':
+               # st.write(wnote[i]['title'])
+               for k in dic_comment:
+                    b_split = dic_comment[k].split("//")
+                    for b in b_split:
+                         n_split = b.split("::")
+                         if n_split[0] != '':
+                              df = pd.DataFrame(n_split).T
+                              df2 = pd.DataFrame()
+                              df2 = pd.concat([df2, df], axis=1)
+                              quiz.append(n_split)
+          ques = []
+          ans = []
+          for i in range(len(quiz)):
+               ques.append(quiz[i][:-1])
+               ans.append(quiz[i][-1])
+          # st.write(quiz)
+          # st.write(ques)
+          # st.write(ans)
+          if len(quiz) < 8:
+               st.write(f':orange[{8 - len(quiz)} note(s) away from playing Memory Game!!]')
+          if len(quiz) >= 8:        #8 <=len(quiz) <= 18:
+               # with st.form("Entry_form1", clear_on_submit=True):
+               #      size1 = st.form_submit_button("4*4")
+               # if size1:
+               with st.form("Entry_form", clear_on_submit=True):
+                    # ques = ['1','2','3','4','5','6','7','8']
+                    # ans = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8']
+                    #st.write(db.fetch_memquiz())
+                    if db.fetch_memquiz() == [] or len(db.fetch_memquiz()[-1]['RandQuiz'])!=16 or len(db.fetch_memquiz()[-1]['RandNote'])!=16:
+                         ran_lst = []
+                         while len(ran_lst) < 16:
+                              ran = random.randint(0, 15)#(0, 15) len(quiz)-1
+                              if ran not in ran_lst:
+                                   ran_lst.append(ran)
+                              #st.write(ran_lst)
+                         ran_note = []
+                         while len(ran_note) < 16:
+                              ran = random.randint(0, len(quiz)-1)  # (0, 15) len(quiz)-1
+                              if ran not in ran_note:
+                                   ran_note.append(ran)
+                         db.insert_memquiz(TODAY,ran_lst,ran_note)
+                    else:
+                         try:
+                              ran_lst = db.fetch_memquiz()[-1]['RandQuiz']
+                              ran_note = db.fetch_memquiz()[-1]['RandNote']
+                         except IndexError:
+                              st.write("IndexERROR")
+
+                    wnote = db.fetch_all_wnote()
+                    quiz = []
+                    for i in range(len(wnote)):
+                         num = wnote[i]['title'].find('{Content}')
+                         dic_comment = eval(wnote[i]['title'][num + 9:])
+                         for k in dic_comment:
+                              b_split = dic_comment[k].split("//")
+                              for b in b_split:
+                                   n_split = b.split("::")
+                                   if n_split[0] != '':
+                                        quiz.append(n_split)
+                    note = []
+                    for ran in ran_note:
+                         note.append(quiz[ran])
+                    quiz = note
+                    ques = []
+                    ans = []
+                    for i in range(len(quiz)):
+                         ques.append(quiz[i][:-1])
+                         ans.append(quiz[i][-1])
+                    # st.write(ans)
+                    # st.write(ques)
+                    lst = []
+                    for k in ran_lst:
+                         if k == 'Empty':
+                              lst.append('Empty')
+                         elif k <= k<=7: #(len(quiz)-1)
+                              lst.append(ques[k])
+                         else:
+                              lst.append(ans[k-8]) #(ans[k-len(quiz])
+                         # lst.append(ques[k])
+                         # lst.append(ans[k])
+                    #st.write(lst[0])
+                    box_lst = []
+                    true_ct = 0
+                    for i in range(4):
+                         col1, col2,col3,col4 = st.columns(4)
+
+                         f = col1.checkbox(f'1{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[0 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append('')
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              elif true_ct <= 2:
+                                   empty = [lst[0 + i * 4]]
+                                   empty.append('')
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[0 + i * 4])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                         else:
+                              if lst[0 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append(lst[0 + i * 4])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[0 + i * 4])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                         box_lst.append([a,f])
+
+                         f = col2.checkbox(f'2{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[1 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append('')
+                                   b = col2.selectbox(f"Select 2{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[1 + i * 4]]
+                                   empty.append('')
+                                   b = col2.selectbox(f"Select 2{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[1 + i * 4])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                         else:
+                              if lst[1 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append(lst[1 + i * 4])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[1 + i * 4])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                         box_lst.append([b, f])
+
+                         f = col3.checkbox(f'3{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[2 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append('')
+                                   c = col3.selectbox(f"Select 3{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[2 + i * 4]]
+                                   empty.append('')
+                                   c = col3.selectbox(f"Select 3{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[2 + i * 4])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                         else:
+                              if lst[2 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append(lst[2 + i * 4])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[2 + i * 4])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                         box_lst.append([c, f])
+
+                         f = col4.checkbox(f'4{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[3 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append('')
+                                   d = col4.selectbox(f"Select 4{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[3 + i * 4]]
+                                   empty.append('')
+                                   d = col4.selectbox(f"Select 4{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[3 + i * 4])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                         else:
+                              if lst[3 + i * 4] == "Empty":
+                                   empty = []
+                                   #empty.append(lst[3 + i * 4])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[3 + i * 4])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                         box_lst.append([d, f])
+                    #st.write(box_lst)
+                    ct = 0
+
+                    check = []
+                    for j in (box_lst):
+                         if True in j:
+                              st.write(str(ct) +'--->'+str(lst[ct]))
+                              if '' in j:
+                                   j[0] = lst[ct]
+                         ct += 1
+                         if "" not in j and None not in j:
+                              check.append(j[0])
+                    st.write((check))
+                    # st.markdown('Streamlit is **_really_ cool**.')
+                    # st.markdown('This text is: red[colored], and this is **:blue[colored] ** and bold.')
+                    # st.markdown(":green[$\sqrt{x^2+y^2}=1$] is a Pythagorean identity. :pencil:")
+                    if check == []:
+                         st.markdown(":red[$Pick Two Cards!$] :warning:")
+                    if len(check) > 2:
+                         st.markdown("**_:red[Two Cards Only!]_** :warning:")
+                    if len(check) >= 2:
+                         if check[0] in ques:
+                              if check[1] in ans:
+                                   if ques.index(check[0]) == ans.index(check[1]):
+                                        # ran_lst.remove(ran_lst(ques.index(check[0])))
+                                        # ran_lst.remove(ran_lst(ans.index(check[1])+7))
+                                        st.write(ran_lst.index(ques.index(check[0])))
+                                        st.write(ran_lst.index(ans.index(check[1])+8))#+8 +len(quiz)
+                                        ran_lst[ran_lst.index(ques.index(check[0]))] = 'Empty'
+                                        ran_lst[ran_lst.index(ans.index(check[1])+8)] = 'Empty'#+8 +len(quiz)
+                                        db.insert_memquiz(TODAY, ran_lst,ran_note)
+                                        st.success("Correct!:ok_hand:")
+                                        st.markdown(':trophy::trophy:')
+                                        db.save_coin("3", TODAY)
+                                   else:
+                                        st.warning("WA:shit:")
+                                        db.save_coin("-2", TODAY)
+                              else:
+                                   st.warning("WA:persevere:")
+                                   db.save_coin("-2", TODAY)
+                         elif check[1] in ques:
+                              if check[0] in ans:
+                                   if ques.index(check[1]) == ans.index(check[0]):
+                                        st.write((ques.index(check[1])))
+                                        st.write((ans.index(check[0])+8))#+8+len(quiz)
+                                        ran_lst[ran_lst.index(ques.index(check[1]))] = 'Empty'
+                                        ran_lst[ran_lst.index(ans.index(check[0])+8)] = 'Empty'#+8+len(quiz)
+                                        db.insert_memquiz(TODAY, ran_lst,ran_note)
+                                        st.success("Correct!:thumbsup:")
+                                        st.markdown(':mahjong::mahjong:')
+                                        db.save_coin("3", TODAY)
+                                   else:
+                                        st.warning("WA:anguished:")
+                                        st.markdown(':space_invader:')
+                                        db.save_coin("-2", TODAY)
+                              else:
+                                   st.warning("WA:confused:")
+                                   db.save_coin("-2", TODAY)
+                         else:
+                              st.warning("WA:sweat:")
+                              db.save_coin("-2", TODAY)
+                    empty_ct = 0
+                    for i in (ran_lst):
+                         if i == "Empty":
+                              empty_ct += 1
+                    if empty_ct == len(ran_lst):
+                         st.success("Well Done!:punch:")
+                         sub2 = st.form_submit_button("Restart:recycle:")
+                         if sub2:
+                              st.write("StartOver")
+                              ran_lst = []
+                              while len(ran_lst) < 16:
+                                   ran = random.randint(0, 15)
+                                   if ran not in ran_lst:
+                                        ran_lst.append(ran)
+                                   # st.write(ran_lst)
+                              ran_note = []
+                              while len(ran_note) < 16:
+                                   ran = random.randint(0, len(quiz) - 1)  # (0, 15) len(quiz)-1
+                                   if ran not in ran_note:
+                                        ran_note.append(ran)
+                              db.insert_memquiz(TODAY, ran_lst, ran_note)
+
+
+                    else:
+                         sub = st.form_submit_button("SUB")
+
+#-----------------6 By 6 Game----------------------------------------------------------------
+          if len(quiz) >= 1800000: #18
+               # with st.form("Entry_form22", clear_on_submit=True):
+               #      size2 = st.form_submit_button("6*6")
+               # if size2:
+               with st.form("Entry_form2", clear_on_submit=True):
+                    # ques = ['1','2','3','4','5','6','7','8']
+                    # ans = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8']
+                    # st.write(db.fetch_memquiz())
+                    if db.fetch_memquiz() == [] or len(db.fetch_memquiz()[-1]['RandQuiz'])!=36:
+                         ran_lst = []
+                         while len(ran_lst) < 36:
+                              ran = random.randint(0, 35)
+                              if ran not in ran_lst:
+                                   ran_lst.append(ran)
+                              # st.write(ran_lst)
+                         db.insert_memquiz(TODAY, ran_lst)
+                    else:
+                         try:
+                              ran_lst = db.fetch_memquiz()[-1]['RandQuiz']
+                         except IndexError:
+                              st.write("IndexERROR")
+                    lst = []
+                    for k in ran_lst:
+                         if k == 'Empty':
+                              lst.append('Empty')
+                         elif k <= 17:
+                              lst.append(ques[k])
+                         else:
+                              lst.append(ans[k - 18])
+                    #st.write(ques)
+                    #st.write(ans)
+                    #st.write(lst)
+                    box_lst = []
+                    true_ct = 0
+                    for i in range(6):
+                         col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+                         f = col1.checkbox(f'1{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[0 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              elif true_ct <= 2:
+                                   empty = [lst[0 + i * 6]]
+                                   empty.append('')
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[0 + i * 6])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                         else:
+                              if lst[0 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[0 + i * 4])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[0 + i * 6])
+                                   a = col1.selectbox(f"Select 1{i}:", empty)
+                         box_lst.append([a, f])
+
+                         f = col2.checkbox(f'2{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[1 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   b = col2.selectbox(f"Select 2{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[1 + i * 6]]
+                                   empty.append('')
+                                   b = col2.selectbox(f"Select 2{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[1 + i * 6])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                         else:
+                              if lst[1 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[1 + i * 4])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[1 + i * 6])
+                                   b = col2.selectbox(f"Select 2{i}:", empty)
+                         box_lst.append([b, f])
+
+                         f = col3.checkbox(f'3{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[2 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   c = col3.selectbox(f"Select 3{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[2 + i * 6]]
+                                   empty.append('')
+                                   c = col3.selectbox(f"Select 3{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[2 + i * 6])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                         else:
+                              if lst[2 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[2 + i * 4])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[2 + i * 6])
+                                   c = col3.selectbox(f"Select 3{i}:", empty)
+                         box_lst.append([c, f])
+
+                         f = col4.checkbox(f'4{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[3 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   d = col4.selectbox(f"Select 4{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[3 + i * 6]]
+                                   empty.append('')
+                                   d = col4.selectbox(f"Select 4{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[3 + i * 6])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                         else:
+                              if lst[3 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[3 + i * 4])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[3 + i * 6])
+                                   d = col4.selectbox(f"Select 4{i}:", empty)
+                         box_lst.append([d, f])
+
+                         f = col5.checkbox(f'5{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[4 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   d = col5.selectbox(f"Select 5{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[4 + i * 6]]
+                                   empty.append('')
+                                   d = col5.selectbox(f"Select 5{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[4 + i * 6])
+                                   d = col5.selectbox(f"Select 5{i}:", empty)
+                         else:
+                              if lst[4 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[3 + i * 4])
+                                   d = col5.selectbox(f"Select 5{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[4 + i * 6])
+                                   d = col5.selectbox(f"Select 5{i}:", empty)
+                         box_lst.append([d, f])
+
+                         f = col6.checkbox(f'6{i}')
+                         if f == True:
+                              true_ct += 1
+                              if lst[5 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append('')
+                                   d = col6.selectbox(f"Select 6{i}:", empty)  # , key="month"
+                              elif true_ct <= 2:
+                                   empty = [lst[5 + i * 6]]
+                                   empty.append('')
+                                   d = col6.selectbox(f"Select 6{i}:", empty)  # , key="month"
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[5 + i * 6])
+                                   d = col6.selectbox(f"Select 6{i}:", empty)
+                         else:
+                              if lst[5 + i * 6] == "Empty":
+                                   empty = []
+                                   # empty.append(lst[3 + i * 4])
+                                   d = col6.selectbox(f"Select 6{i}:", empty)
+                              else:
+                                   empty = ['']
+                                   empty.append(lst[5 + i * 6])
+                                   d = col6.selectbox(f"Select 6{i}:", empty)
+                         box_lst.append([d, f])
+
+                    #st.write(box_lst)
+                    ct = 0
+
+                    check = []
+                    for j in (box_lst):
+                         if True in j:
+                              st.write(str(ct) + '--->' + str(lst[ct]))
+                              if '' in j:
+                                   j[0] = lst[ct]
+                         ct += 1
+                         if "" not in j and None not in j:
+                              check.append(j[0])
+                    #st.write((check))
+                    # st.markdown('Streamlit is **_really_ cool**.')
+                    # st.markdown('This text is: red[colored], and this is **:blue[colored] ** and bold.')
+                    # st.markdown(":green[$\sqrt{x^2+y^2}=1$] is a Pythagorean identity. :pencil:")
+                    if check == []:
+                         st.markdown(":red[$Pick Two Cards!$] :warning:")
+                    if len(check) > 2:
+                         st.markdown("**_:red[Two Cards Only!]_** :warning:")
+                    if len(check) >= 2:
+                         if check[0] in ques:
+                              if check[1] in ans:
+                                   if ques.index(check[0]) == ans.index(check[1]):
+                                        # ran_lst.remove(ran_lst(ques.index(check[0])))
+                                        # ran_lst.remove(ran_lst(ans.index(check[1])+7))
+                                        st.write(ran_lst.index(ques.index(check[0])))
+                                        st.write(ran_lst.index(ans.index(check[1]) + 18))
+                                        ran_lst[ran_lst.index(ques.index(check[0]))] = 'Empty'
+                                        ran_lst[ran_lst.index(ans.index(check[1]) + 18)] = 'Empty'
+                                        db.insert_memquiz(TODAY, ran_lst)
+                                        st.success("Correct!:ok_hand:")
+                                        st.markdown(':trophy::trophy:')
+                                        db.save_coin("3", TODAY)
+                                   else:
+                                        st.warning("WA:shit:")
+                                        db.save_coin("-2", TODAY)
+                              else:
+                                   st.warning("WA:persevere:")
+                                   db.save_coin("-2", TODAY)
+                         elif check[1] in ques:
+                              if check[0] in ans:
+                                   if ques.index(check[1]) == ans.index(check[0]):
+                                        st.write((ques.index(check[1])))
+                                        st.write((ans.index(check[0]) + 18))
+                                        ran_lst[ran_lst.index(ques.index(check[1]))] = 'Empty'
+                                        ran_lst[ran_lst.index(ans.index(check[0]) + 18)] = 'Empty'
+                                        db.insert_memquiz(TODAY, ran_lst)
+                                        st.success("Correct!:thumbsup:")
+                                        st.markdown(':mahjong::mahjong:')
+                                        db.save_coin("3", TODAY)
+                                   else:
+                                        st.warning("WA:anguished:")
+                                        st.markdown(':space_invader:')
+                                        db.save_coin("-2", TODAY)
+                              else:
+                                   st.warning("WA:confused:")
+                                   db.save_coin("-2", TODAY)
+                         else:
+                              st.warning("WA:sweat:")
+                              db.save_coin("-2", TODAY)
+                    empty_ct = 0
+                    for i in (ran_lst):
+                         if i == "Empty":
+                              empty_ct += 1
+                    if empty_ct == len(ran_lst):
+                         st.success("Well Done!:punch:")
+                         sub2 = st.form_submit_button("Restart:recycle:")
+                         if sub2:
+                              st.write("StartOver")
+                              ran_lst = []
+                              while len(ran_lst) < 36:
+                                   ran = random.randint(0, 35)
+                                   if ran not in ran_lst:
+                                        ran_lst.append(ran)
+                                   # st.write(ran_lst)
+                              db.insert_memquiz(TODAY, ran_lst)
+
+
+                    else:
+                         sub = st.form_submit_button("SUB")
+
      #--------------Upload Image Chaos--------------
      # from pathlib import Path
      # from PIL import Image
