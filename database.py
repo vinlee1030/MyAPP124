@@ -105,6 +105,17 @@ def delete_dquiz(key):
     res = dquiz.delete(key)
     return res
 
+memquiz = deta.Base("Memory_Quiz_Log")
+def insert_memquiz(date, rand_quiz,rand_note):
+    return memquiz.put({"key": date,"RandQuiz": rand_quiz,"RandNote": rand_note})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_memquiz():
+    res = memquiz.fetch()
+    return res.items
+def delete_memquiz(key):
+    res = memquiz.delete(key)
+    return res
+
 coin = deta.Base("CoinMaster")
 def save_coin(c, date):
     return coin.put({"key": date,"Earnings": c})
