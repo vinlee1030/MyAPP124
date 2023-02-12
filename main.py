@@ -89,7 +89,7 @@ if selected == "Income&Expense Tracker":
 if selected == "To Do List":
     st.title(f"<{selected}>")
 #-----------My Notes Tab------------------------
-subjects = ['','Macroeconomics','Engineering Math','Mandarin','Biology','BioStats','Env.Hygiene','Psychology','Ideas','Lecture','Future Plannings','Journal','Others']
+subjects = ['','Macroeconomics','Engineering Math','Mandarin','Biology','BioStats','Env.Hygiene','Psychology','Ideas','Lecture','Future Plannings','Journal','Work','Others']
 categories = ['Lecture Notes','Exam','Quiz','HW']
 importance = ['Memorization','Concept','Eziness','Advanced']
 #db.insert_sub(subjects,TODAY) #FUTURE: Create Subjects!
@@ -109,7 +109,7 @@ if selected == 'My Notes':
         options=subjects,
         icons=["search", "currency-exchange", 'infinity','translate','heart',
                'bar-chart-line','flower3','emoji-smile-upside-down-fill','lightbulb-fill',
-               'collection-play-fill','card-checklist','journal-richtext','motherboard'],  # https://icons.getbootstrap.com/  bar-chart-fill
+               'collection-play-fill','card-checklist','journal-richtext','person-workspace','motherboard'],  # https://icons.getbootstrap.com/  bar-chart-fill
         orientation="horizontal",
     )
     if selected3 != '':
