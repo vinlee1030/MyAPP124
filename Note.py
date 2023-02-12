@@ -332,7 +332,8 @@ class Note:
                               df = pd.DataFrame(n_split).T
                               df2 = pd.DataFrame()
                               df2 = pd.concat([df2, df], axis=1)
-                              quiz.append(n_split)
+                              if len(n_split) > 1:
+                                   quiz.append(n_split)
           ques = []
           ans = []
           for i in range(len(quiz)):
@@ -381,7 +382,8 @@ class Note:
                               for b in b_split:
                                    n_split = b.split("::")
                                    if n_split[0] != '':
-                                        quiz.append(n_split)
+                                        if len(n_split) > 1:                              
+                                             quiz.append(n_split)
                     note = []
                     for ran in ran_note:
                          note.append(quiz[ran])
