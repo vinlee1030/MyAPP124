@@ -125,8 +125,8 @@ def fetch_coin():
     return res.items
 
 hform = deta.Base("Hform_Log")
-def insert_hform(date, DS, states,descriptions):
-    return hform.put({"key": date, "DailySurvey": DS, 'States': states,'Descriptions':descriptions})
+def insert_hform(date, DS, states,descriptions,illness):
+    return hform.put({"key": date, "DailySurvey": DS, 'States': states,'Descriptions':descriptions,'Illness':illness})
 #,"Ques":question,"Ans":ans})#,question,ans):
 def fetch_hform():
     res = hform.fetch()
