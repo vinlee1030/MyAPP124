@@ -360,7 +360,7 @@ class Note:
                                    ran_lst.append(ran)
                               #st.write(ran_lst)
                          ran_note = []
-                         while len(ran_note) < 16:
+                         while len(ran_note) < len(quiz):#16:
                               ran = random.randint(0, len(quiz)-1)  # (0, 15) len(quiz)-1
                               if ran not in ran_note:
                                    ran_note.append(ran)
