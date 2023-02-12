@@ -1349,18 +1349,20 @@ if selected == 'SIR Model Simulation':
 if selected == "Health Form":
     with st.form("Entry_Hform", clear_on_submit=True):
         states = ['N','F','W','A']
+        illness = ['None','Diarrhea','Blister','Nausea','Stomachache','BackPain','MusclePain','Flu']
         #col1, col2 = st.columns(2)
         st.selectbox("Select States:", states, key="states")
+        st.multiselect("Feeling Sick?", illness, key = 'illness')
         #col1.selectbox("Select Categories:", categories, key="cat")
 
         "---"
-        daily_ques = ['H2O Intake','# of Meals','Meals Quality','Hours of Sleep','Naps'
-                      'Hours of Exercises','Intensity of Exercises','#1','#2','Tiredness','Mood']
+        daily_ques = ['H2O Intake','# of Meals','Fruit/Veggie/Cellulose','Proteins','Fats','Carbohydrate','Meals Quality','Hours of Sleep','Naps'
+                      'Hours of Exercises','Intensity of Exercises','#1','#2','Tiredness','Mood','WakeUpTime','BedTime']
         with st.expander("Daily Survey"):
             d_value = []
             for d in daily_ques:
                 # st.number_input(f"{im}", min_value=0, format="%i", step=1, key=im) #<----For number input option
-                d_value.append(st.slider('[' + d + ']' + ": " + "scale between 0-10", value=0.0, max_value=15.0,step = 0.5))
+                d_value.append(st.slider('[' + d + ']' + ": " + "scale between 0-15", value=0.0, max_value=15.0,step = 0.5))
                 # st.text(im_value)
 
         with st.expander("Desciptions"):
@@ -1369,6 +1371,7 @@ if selected == "Health Form":
         if submitted:
 
             sta = str(st.session_state["states"])
+            ill = str(st.session_state["illness"])
             #cat = str(st.session_state["cat"])
             # importance = {im: st.session_state[im] for im in importance}
             n_dq = daily_ques
@@ -1380,5 +1383,5 @@ if selected == "Health Form":
                 except IndexError:
                     pass
 
-            db.insert_hform(TODAY, daily_ques, sta, des)
+            db.insert_hform(TODAY, daily_ques, sta, des, ill)
             st.success("“Physical fitness is the first requisite of happiness.” – Joseph Pilates")
