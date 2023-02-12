@@ -463,7 +463,8 @@ if selected == 'My Notes':
                 # for n in n_split:
                 #     n_split = st.columns(len(n_split))
                     #st.write(n_split)
-
+        nt.Note.Mem_quiz(wnote)
+        
         st.header("Challenge")
 
         with st.form("entry_form", clear_on_submit=True):
