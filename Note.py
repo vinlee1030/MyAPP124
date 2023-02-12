@@ -9,7 +9,7 @@ TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime
 class Note:
 
      i = f'Welcome to my Life Note! Today is {str(datetime.now().strftime("%Y-%m-%d"))}'
-     def quizzing(wnote):
+     def quizzing(wnote): #<----wnote = daily wnote
           coin_gain = 0
           coin_loss = 0
           with st.form("entry_form"):#, clear_on_submit=True):
@@ -315,6 +315,7 @@ class Note:
 
 
 #-----------Memory Quiz------------------------------------------------------------
+     def Mem_quiz(wnote):
           st.title("Memory Quiz")
           wnote = db.fetch_all_wnote()
           quiz = []
