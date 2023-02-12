@@ -342,7 +342,12 @@ if selected == 'My Notes':
                 #st.text(chart[0]["key"])
                 #st.dataframe(chart)
                 st.success("Data saved!")
+    
     if selected2 == "Notes Search":
+        if "button_clicked" not in st.session_state:
+            st.session_state.button_clicked = False
+        def callback():
+            st.session_state.button_clicked = True
         st.header("Notes Search")
         with st.form("saved_periods"):
             lst_file = db.list_files()[-5:]
@@ -359,8 +364,10 @@ if selected == 'My Notes':
                     pass
 
             selected_file = st.selectbox("Select Results:", lst_file)
-            submitted = st.form_submit_button("Load Notes")
-            if submitted:
+            submitted = st.form_submit_button("Load Notes", on_click=callback())
+            if submitted or st.session_state.button_clicked:
+
+                updates = {}
                 if "wnote" in selected_file:
                     #st.text(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])
                     try:
@@ -379,6 +386,7 @@ if selected == 'My Notes':
                     if len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]) != 0: #<---always >=1; doesn't need this
                         #st.text(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]))
                         for i in range(len(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"])):
+
                             try:
 
                                 # Get data from database
@@ -386,11 +394,18 @@ if selected == 'My Notes':
                                 content = photos.read()
                                 st.image(content)
                                 st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]["Comment"+str(i+1)+": "])
+                                update_comment = st.text_area('',
+                                    db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                        "Comment" + str(i + 1) + ": "])
+                                updates.update({f'Comment{i+1}: ':update_comment})
                             except AttributeError:
                                 try:
                                     st.success(
                                     db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
                                         "Comment" + str(i + 1) + ": "]) #fetch: returns the whole dictionary when one key is searched  db.fetch({"age": 30})-->returns whole dict with this element
+                                    update_comment = st.text_area('', db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                        "Comment" + str(i + 1) + ": "])
+                                    updates.update({f'Comment{i + 1}: ': update_comment})
                                 except AttributeError:
                                     st.text("No data exists")
                                 #pass
@@ -412,7 +427,9 @@ if selected == 'My Notes':
 
                     else:
                         st.success(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"]["Comment1"+ ": "])
-
+                        update_comment = st.text_area('',db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["comment"][
+                                         "Comment" + str(i + 1) + ": "])
+                        updates.update({f'Comment{i + 1}: ': update_comment})
                     st.json(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})) #<--May Reapeat! Search by title name
                     st.dataframe(db.fetch_wnote(
                         {"title": selected_file.replace("[wnote]: ", "")}))  # selected_file.replace("wnote: ","")
@@ -435,7 +452,25 @@ if selected == 'My Notes':
                     photos = db.fetch_notes(selected_file)
                     content = photos.read()
                     st.image(content)
+                #st.write(db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"])
+                try:
+                    update_key = db.fetch_wnote({"title": selected_file.replace("[wnote]: ", "")})[0]["key"]
+                except IndexError:
+                    pass
+        #with st.form("Update_notes"):
+                submit = st.form_submit_button("Update Notes")
+                if submit:
+                    st.success("Updated")
 
+                    for i in updates:
+                        st.write(updates[i])
+                        n_updates = {f"comment.{i}":updates[i]}
+                        db.update_wnote(n_updates, update_key)
+                    note_title = selected_file.replace("[wnote]: ", "")
+                    note_title = note_title[:note_title.find("#{Content}")+10] + str(updates)
+                    st.write(note_title)
+                    title_update = {'title':note_title}
+                    db.update_wnote(title_update, update_key)
 
     if selected2 == "Review Notes":
         st.header("Review")
