@@ -143,6 +143,9 @@ def insert_wnote(dt,subject,category,importance,comment,title):
 def fetch_wnote(fn):
     res = nt_srch.fetch(fn)
     return res.items
+def update_wnote(updates, key):
+    #res = nt_srch.update()
+    return nt_srch.update(updates, key)
 def fetch_all_wnote():
     res = nt_srch.fetch()
     all_items = res.items
