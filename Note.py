@@ -352,7 +352,7 @@ class Note:
                     # ques = ['1','2','3','4','5','6','7','8']
                     # ans = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8']
                     #st.write(db.fetch_memquiz())
-                    if db.fetch_memquiz() == [] or len(db.fetch_memquiz()[-1]['RandQuiz'])!=16 or len(db.fetch_memquiz()[-1]['RandNote'])!=16:
+                    if db.fetch_memquiz() == [] or len(db.fetch_memquiz()[-1]['RandQuiz'])!=16 or len(db.fetch_memquiz()[-1]['RandNote'])!=len(quiz):#16:
                          ran_lst = []
                          while len(ran_lst) < 16:
                               ran = random.randint(0, 15)#(0, 15) len(quiz)-1
