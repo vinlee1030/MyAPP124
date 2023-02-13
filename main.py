@@ -64,6 +64,7 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 # --- NAVIGATION MENU ---
 
 with st.sidebar:
+    st.image("https://www.onepointltd.com/wp-content/uploads/2020/03/inno2.png")
     selected = option_menu(
         menu_title="Main Menu", #None
         options=["Home","My Notes","Income&Expense Tracker","To Do List","SIR Model Simulation","Health Form"], #Contact
@@ -73,6 +74,7 @@ with st.sidebar:
         orientation="vertical" #optional
 
     )
+    st.image("http://www.constructcityparticularlynet.com.tw/SYN/Totem/easy/mo5.jpg")
 #st.title("My App")
 #n_quiz = []
 if selected == "Home":
@@ -1384,14 +1386,14 @@ if selected == 'SIR Model Simulation':
 if selected == "Health Form":
     with st.form("Entry_Hform", clear_on_submit=True):
         states = ['N','F','W','A']
-        illness = ['None','Diarrhea','Blister','Nausea','Stomachache','BackPain','MusclePain','Flu']
+        illness = ['None','Diarrhea','Blister','Nausea','Stomachache','BackPain','MusclePain','Flu','Rashes']
         #col1, col2 = st.columns(2)
         st.selectbox("Select States:", states, key="states")
         st.multiselect("Feeling Sick?", illness, key = 'illness')
         #col1.selectbox("Select Categories:", categories, key="cat")
 
         "---"
-        daily_ques = ['H2O Intake','# of Meals','Fruit/Veggie/Cellulose','Proteins','Fats','Carbohydrate','Meals Quality','Hours of Sleep','Naps'
+        daily_ques = ['H2O Intake','# of Meals','Appetite','Fruit/Veggie/Cellulose','Proteins','Fats','Carbohydrate','Meals Quality','Hours of Sleep','Naps'
                       'Hours of Exercises','Intensity of Exercises','#1','#2','Tiredness','Mood','WakeUpTime','BedTime']
         with st.expander("Daily Survey"):
             d_value = []
