@@ -317,7 +317,7 @@ class Note:
 #-----------Memory Quiz------------------------------------------------------------
      def Mem_quiz(wnote):
           st.title("Memory Quiz")
-          wnote = db.fetch_all_wnote()
+          #wnote = db.fetch_all_wnote()
           quiz = []
           for i in range(len(wnote)):
                num = wnote[i]['title'].find('{Content}')
