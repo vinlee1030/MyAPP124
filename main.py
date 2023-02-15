@@ -220,6 +220,7 @@ if selected == 'My Notes':
                 photos = db.fetch_notes(selected_file)
                 content = photos.read()
                 st.image(content)
+        nt.Note.Mem_quiz(wnote)
     selected2 = option_menu(
         menu_title=None,
         options=["Notes Entry", "Notes Search", "Review Notes"],
@@ -1330,6 +1331,7 @@ if selected == "Home":
             st.image(content)
 
     st.title("Today's Challenge")
+    nt.Note.Mem_quiz(wnote)
     nt.Note.quizzing(wnote)
     
 #---------------------------SIR Model----------------------
