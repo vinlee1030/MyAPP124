@@ -8,12 +8,12 @@ from dotenv import load_dotenv
 load_dotenv(".env")
 #DETA_KEY = os.getenv("DETA_KEY")
 DETA_KEY = st.secrets["DETA_KEY"] #<---This for st cloud
-
+CHAT_KEY = st.secrets["CHAT_KEY"]
 # Initialize with a project key
 deta = Deta(DETA_KEY)
 
 # This is how to create/connect a database
-db = deta.Base("monthly_reports")
+db = deta.Base("Daily_reports")
 nt = deta.Base("Notes")
 def insert_period(period, incomes, expenses, comment):
     """Returns the report on a successful creation, otherwise raises an error"""
@@ -23,16 +23,16 @@ def insert_chart(date,chart):
     return nt.put(chart,date)
 
 def fetch_all_chart():
-    # res = nt.fetch()
-    # return res.items
     res = nt.fetch()
-    all_items = res.items
-
-    # fetch until last is 'None'
-    while res.last:
-        res = nt.fetch(last=res.last)
-        all_items += res.items
-    return all_items
+    return res.items
+    # res = nt.fetch()
+    # all_items = res.items
+    #
+    # # fetch until last is 'None'
+    # while res.last:
+    #     res = nt.fetch(last=res.last)
+    #     all_items += res.items
+    # return all_items
 def fetch_chart(fn):
     res = nt.fetch(fn)
     return res.items
@@ -53,7 +53,7 @@ photos = deta.Drive("images") # access to your drive
 
 def photos_upload(fn, data):
     #fn =file.name
-    path = os.path.abspath(fn) #<------return full path: C:\Users\ericn\PycharmProjects\MyAPP124\SingleBH.png
+    #path = os.path.abspath(fn) #<------return full path: C:\Users\ericn\PycharmProjects\MyAPP124\SingleBH.png
     return photos.put(fn, data) #<---------HAS TO FIT IN BYTES_DATA TO GENERATE IMAGE DATA!!
 
 def fetch_notes(fn):
@@ -76,6 +76,65 @@ def fetch_cache():
     res = sc.fetch()
     return res.items
 
+sub = deta.Base("Notes_Subjects")
+def insert_sub(key, date):
+    return sub.put(key, date)
+
+def fetch_sub():
+    res = sub.fetch()
+    return res.items
+quiz = deta.Base("Quiz_Log")
+def insert_quiz(n_quiz, date, shuf_ques, shuf_ans,correct):
+    return quiz.put({"key": n_quiz,"Date": date, "Question": shuf_ques, 'Ans': shuf_ans,'Correct':correct})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_quiz():
+    res = quiz.fetch()
+    return res.items
+def delete_quiz(key):
+    res = quiz.delete(key)
+    return res
+
+dquiz = deta.Base("Daily_Quiz_Log")
+def insert_dquiz(n_quiz, date, shuf_ques, shuf_ans,correct):
+    return dquiz.put({"key": n_quiz,"Date": date, "Question": shuf_ques, 'Ans': shuf_ans,'Correct':correct})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_dquiz():
+    res = dquiz.fetch()
+    return res.items
+def delete_dquiz(key):
+    res = dquiz.delete(key)
+    return res
+
+memquiz = deta.Base("Memory_Quiz_Log")
+def insert_memquiz(date, rand_quiz,rand_note):
+    return memquiz.put({"key": date,"RandQuiz": rand_quiz,"RandNote": rand_note})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_memquiz():
+    res = memquiz.fetch()
+    return res.items
+def delete_memquiz(key):
+    res = memquiz.delete(key)
+    return res
+
+coin = deta.Base("CoinMaster")
+def save_coin(c, date):
+    return coin.put({"key": date,"Earnings": c})
+
+def fetch_coin():
+    res = coin.fetch()
+    return res.items
+
+hform = deta.Base("Hform_Log")
+def insert_hform(date, DS, states,descriptions,illness):
+    return hform.put({"key": date, "DailySurvey": DS, 'States': states,'Descriptions':descriptions,'Illness':illness})
+#,"Ques":question,"Ans":ans})#,question,ans):
+def fetch_hform():
+    res = hform.fetch()
+    return res.items
+def delete_hform(key):
+    res = hform.delete(key)
+    return res
+
 nt_srch = deta.Base("WritingNotes") #<---------Can't have spaces in name!!!'
 
 def insert_wnote(dt,subject,category,importance,comment,title):
@@ -84,6 +143,9 @@ def insert_wnote(dt,subject,category,importance,comment,title):
 def fetch_wnote(fn):
     res = nt_srch.fetch(fn)
     return res.items
+def update_wnote(updates, key):
+    #res = nt_srch.update()
+    return nt_srch.update(updates, key)
 def fetch_all_wnote():
     res = nt_srch.fetch()
     all_items = res.items
