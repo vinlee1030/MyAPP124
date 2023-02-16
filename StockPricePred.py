@@ -13,17 +13,17 @@ class SPP:
         #cmdstanpy.install_cmdstan()
         #cmdstanpy.install_cmdstan(compiler=True)
         #START = "2015-01-01"
-        START = "2020-01-01"
+        START = "2015-01-01"
         TODAY = date.today().strftime("%Y-%m-%d")
 
         st.title('Stock Forecast App')
 
-        stocks = ('GOOG', 'AAPL', 'MSFT', 'GME')
+        stocks = ('2330.TW','2303.TW','8069.TW','2454.TW','2317.TW','^TWII','TSLA','GOOG', 'AAPL', 'MSFT', 'GME')
         selected_stock = st.selectbox('Select dataset for prediction', stocks)
 
-        n_years = st.slider('Years of prediction:', 1, 4)
-        period = n_years * 365
-
+        n_years = st.slider('Years of prediction:', 1, 60)
+        #period = n_years * 365
+        period = n_years
 
         @st.cache
         def load_data(ticker):
@@ -65,7 +65,7 @@ class SPP:
         st.subheader('Forecast data')
         st.write(forecast.tail())
 
-        st.write(f'Forecast plot for {n_years} years')
+        st.write(f'Forecast plot for {n_years} days')
         fig1 = plot_plotly(m, forecast)
         st.plotly_chart(fig1)
 
