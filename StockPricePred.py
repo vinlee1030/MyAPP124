@@ -13,7 +13,7 @@ class SPP:
         #cmdstanpy.install_cmdstan()
         #cmdstanpy.install_cmdstan(compiler=True)
         #START = "2015-01-01"
-        START = "2015-01-01"
+        START = "2018-01-01"
         TODAY = date.today().strftime("%Y-%m-%d")
 
         st.title('Stock Forecast App')
@@ -21,7 +21,7 @@ class SPP:
         stocks = ('2330.TW','2303.TW','8069.TW','2454.TW','2317.TW','^TWII','TSLA','GOOG', 'AAPL', 'MSFT', 'GME')
         selected_stock = st.selectbox('Select dataset for prediction', stocks)
 
-        n_years = st.slider('Years of prediction:', 1, 60)
+        n_years = st.slider('Days of prediction:', 1, 60)
         #period = n_years * 365
         period = n_years
 
@@ -44,7 +44,7 @@ class SPP:
         # Plot raw data
         def plot_raw_data():
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=data['Date'], y=data['Open'], name="stock_open"))
+            fig.add_trace(go.Scatter(x=data['Date'], y=data['Open'], name="stock_open", fillcolor="red"))
             fig.add_trace(go.Scatter(x=data['Date'], y=data['Close'], name="stock_close"))
             fig.layout.update(title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
             st.plotly_chart(fig)
