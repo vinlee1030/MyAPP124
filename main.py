@@ -1100,7 +1100,8 @@ if selected == "Home":
         sub = st.form_submit_button("Search")
         import openai
         if sub:
-            openai.api_key = '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'
+            
+            openai.api_key = st.secrets(CHAT_KEY)#'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'
 
             response = openai.Completion.create(
                 engine="text-davinci-003",  # select model
