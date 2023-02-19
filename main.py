@@ -1101,7 +1101,7 @@ if selected == "Home":
         import openai
         if sub:
             
-            openai.api_key = st.secrets(CHAT_KEY)#'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'
+            openai.api_key = st.secrets["CHAT_KEY"]#'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'
 
             response = openai.Completion.create(
                 engine="text-davinci-003",  # select model
