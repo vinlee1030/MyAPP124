@@ -27,7 +27,7 @@ EXAMPLE_NO = 1
 # def aslocaltimestr(utc_dt):
 #     return utc_to_local(utc_dt).strftime('%Y-%m-%d %H:%M:%S.%f %Z%z')
 
-                                                                                                                  #+8_
+                                                                                                                   #+8_
 TODAY = str(datetime.now()).split(":")[0].split(" ")[0]+" "+str(int(str(datetime.now()).split(":")[0].split(" ")[1])+8) +":"+ str(datetime.now()).split(":")[1]+" "+str(datetime.now()).split(":")[2]
 # -------------- SETTINGS --------------
 incomes = ["Salary", "Allowance", 'Interests',"Other Income"]
@@ -1094,26 +1094,7 @@ if selected == "Home":
     col2.title(':moneybag:')
     col2.metric('Account',f"${m_sum}",'Tokens')
     #st.write(db.fetch_coin()[0]['Earnings'])
-    st.title("Quick Search")
-    with st.form("Quick Search"):
-        query = st.text_input('Query')
-        sub = st.form_submit_button("Search")
-        import openai
-        if sub:
-            
-            openai.api_key = st.secrets["CHAT_KEY"]#'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'
 
-            response = openai.Completion.create(
-                engine="text-davinci-003",  # select model
-                prompt= query,#"ChatGPT是什麼？",
-                max_tokens=512,  # response tokens
-                temperature=1,  # diversity related
-                top_p=0.75,  # diversity related
-                n=1,  # num of response
-            )
-
-            completed_text = response["choices"][0]["text"]
-            st.write(completed_text)
 
     # -------------Plot daily loading bar chart
     result = view_all_data()
@@ -1336,7 +1317,25 @@ if selected == "Home":
     st.title("Today's Challenge")
     nt.Note.Mem_quiz(wnote)
     nt.Note.quizzing(wnote)
-    
+    st.title("Quiz Search")
+    with st.form("Quick Search"):
+        query = st.text_input('Query')
+        sub = st.form_submit_button("Search")
+        import openai
+        if sub:
+            openai.api_key = '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'
+
+            response = openai.Completion.create(
+                engine="text-davinci-003",  # select model
+                prompt= query,#"ChatGPT是什麼？",
+                max_tokens=512,  # response tokens
+                temperature=1,  # diversity related
+                top_p=0.75,  # diversity related
+                n=1,  # num of response
+            )
+
+            completed_text = response["choices"][0]["text"]
+            st.write(completed_text)
 #---------------------------SIR Model----------------------
 if selected == 'SIR Model Simulation':
     import matplotlib.pyplot as plt
