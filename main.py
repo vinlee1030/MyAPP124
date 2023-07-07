@@ -1153,7 +1153,7 @@ if selected == "Home":
     task_df = task_df.reset_index()
     st.dataframe(task_df)
 
-    p1 = px.pie(task_df, names='index', values='Status')
+    p1 = px.pie(task_df, names='Status', values='count')
     st.plotly_chart(p1, use_container_width=True)
 
     # Get data from database
