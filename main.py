@@ -1317,7 +1317,8 @@ if selected == "Home":
     st.title("Today's Challenge")
     nt.Note.Mem_quiz(wnote)
     nt.Note.quizzing(wnote)
-    st.title("Quiz Search")
+    st.title("ChatGpt Search")
+    st.write("Not working currently since I've past the free trial period!!")
     with st.form("Quick Search"):
         query = st.text_input('Query')
         sub = st.form_submit_button("Search")
