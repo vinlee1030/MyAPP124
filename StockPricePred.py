@@ -39,7 +39,9 @@ class SPP:
         data_load_state.text('Loading data... done!')
 
         st.subheader('Raw data')
-        data = load_data('GOOG')
+
+        data = yf.download('GOOG', START, TODAY)
+        #data = load_data('GOOG')
         st.write(data)
         st.write(data.tail())
 
