@@ -15,7 +15,8 @@ class SPP:
         #START = "2015-01-01"
         START = "2018-01-01"
         TODAY = date.today().strftime("%Y-%m-%d")
-
+        st.write(TODAY)
+        
         st.title('Stock Forecast App')
 
         stocks = ('2330.TW','2303.TW','8069.TW','2454.TW','2317.TW','^TWII','TSLA','GOOG', 'AAPL', 'MSFT', 'GME')
@@ -38,6 +39,7 @@ class SPP:
         data_load_state.text('Loading data... done!')
 
         st.subheader('Raw data')
+        st.write(data)
         st.write(data.tail())
 
 
