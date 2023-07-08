@@ -38,13 +38,15 @@ class SPP:
         #data = load_data('GOOG')
         data_load_state.text('Loading data... done!')
 
+
+        st.subheader('Major Holders')
+        selected_stock = yf.Ticker(selected_stock)
+        
+        st.write(selected_stock.major_holders)
+        
         st.subheader('Raw data')
-
-        data = yf.download('GOOG', START, TODAY)
-        #data = load_data('GOOG')
-        tesla = yf.Ticker("TSLA")
-
-        st.write(tesla.major_holders)
+        data = selected_stock.history(start = START, end = TODAY)
+    
         st.write(data)
         st.write(data.tail())
 
