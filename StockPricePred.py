@@ -38,7 +38,7 @@ class SPP:
         #data = load_data('GOOG')
         data_load_state.text('Loading data... done!')
 
-
+        #NOT RETRIEVING DATA FRAME AS data, DON'T KONW WHY
         data = yf.download(selected_stock,"2015-01-01", "2018-01-01")
     
         st.write(data)
