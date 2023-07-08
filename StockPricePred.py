@@ -39,16 +39,22 @@ class SPP:
         data_load_state.text('Loading data... done!')
 
 
+        data = yf.download(selected_stock,"2015-01-01", "2018-01-01")
+    
+        st.write(data)
+        st.write(data.tail())
+        
         st.subheader('Major Holders')
         selected_stock = yf.Ticker(selected_stock)
         
         st.write(selected_stock.major_holders)
         
         st.subheader('Raw data')
-        data = selected_stock.history(start = START, end = TODAY)
+        data = selected_stock.history(period = '1d', start = "2015-01-01", end = "2018-01-01")
     
         st.write(data)
         st.write(data.tail())
+        
 
 
         # Plot raw data
