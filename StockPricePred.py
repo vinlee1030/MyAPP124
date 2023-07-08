@@ -42,6 +42,9 @@ class SPP:
 
         data = yf.download('GOOG', START, TODAY)
         #data = load_data('GOOG')
+        tesla = yf.Ticker("TSLA")
+
+        st.write(tesla.major_holders)
         st.write(data)
         st.write(data.tail())
 
